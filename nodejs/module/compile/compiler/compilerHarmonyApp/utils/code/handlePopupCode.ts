@@ -11,7 +11,7 @@ const handlePopupCode = (page) => {
   if (page.content.includes("controller:")) {
     page.importManager.addImport({
       packageName: COMPONENT_PACKAGE_NAME,
-      dependencyNames: ["Controller"],
+      dependencyNames: ["Controller", "ModuleController"],
       importType: "named",
     });
   }

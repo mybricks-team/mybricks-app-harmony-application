@@ -817,12 +817,12 @@ const Designer = ({ appData }) => {
             data: {
               ...json,
               toJson,
-              sectionsMap: designerRef.current.getSections().reduce((sectionsMap, section) => {
+              sectionsMap: designerRef.current.getSections()?.reduce((sectionsMap, section) => {
                 sectionsMap[section.id] = {
                   previewImageData: section.previewImageData
                 }
                 return sectionsMap
-              }, {})
+              }, {}) || {}
             }
           },
           withCredentials: false,
