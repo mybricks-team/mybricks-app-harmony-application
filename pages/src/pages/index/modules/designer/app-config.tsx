@@ -706,22 +706,22 @@ export default function ({
           // },
         ],
         adder: [
-          {
-            type: 'defined',
-            title: 'AI生成...',
-            load: () => {
-              return new Promise((resolve, reject) => {
-                const destroy = showAIPageModal({
-                  prompts: HarmonyPrompts,
-                  definitions: HarmonyDefinitions,
-                  onGenerateFinish({ templateJson }) {
-                    resolve(templateJson)
-                    destroy?.()
-                  },
-                })
-              })
-            }
-          },
+          // {
+          //   type: 'defined',
+          //   title: 'AI生成...',
+          //   load: () => {
+          //     return new Promise((resolve, reject) => {
+          //       const destroy = showAIPageModal({
+          //         prompts: HarmonyPrompts,
+          //         definitions: HarmonyDefinitions,
+          //         onGenerateFinish({ templateJson }) {
+          //           resolve(templateJson)
+          //           destroy?.()
+          //         },
+          //       })
+          //     })
+          //   }
+          // },
           {
             type: "normal",
             title: `${getPageTitlePrefix()}标签页`,
@@ -884,9 +884,9 @@ export default function ({
     // aiView: getAiView(appConfig?.publishLocalizeConfig?.enableAI, {
     //   model: appConfig?.publishLocalizeConfig?.selectAIModel
     // }), // TODO: 开发settings页面后再放开注释
-    aiView: getAiView(true, {
-      model: DEFAULT_AI_MODEL,
-    }),
+    // aiView: getAiView(true, {
+    //   model: DEFAULT_AI_MODEL,
+    // }),
     com: {
       env: {
         callConnector(connector, params, connectorConfig) {
