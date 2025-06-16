@@ -123,9 +123,9 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
           </Tooltip>
         ) : null}
         <Toolbar.Save disabled={!operable} onClick={onSave} dotTip={isModify} />
-        <Toolbar.Button disabled={!operable} onClick={publishHandle}>发布</Toolbar.Button>
-        <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyModule })}>下载源码(模块)</Toolbar.Button>
-        <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>下载源码(应用)</Toolbar.Button>
+        {/* <Toolbar.Button disabled={!operable} onClick={publishHandle}>发布</Toolbar.Button> */}
+        {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyModule })}>下载源码(模块)</Toolbar.Button> */}
+        <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>下载源码</Toolbar.Button>
       </Toolbar>
     </>
   );

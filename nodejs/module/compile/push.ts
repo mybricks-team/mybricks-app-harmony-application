@@ -19,9 +19,9 @@ export async function publishPush(params, uploadfolderPath) {
   Logger.info("[publish] 开始推送数据...");
 
   //
-  const mySetting = await API.Setting.getSetting(["mybricks-app-harmony-module"], {});
+  const mySetting = await API.Setting.getSetting(["mybricks-app-harmony-application"], {});
   let customPublishApi =
-    mySetting["mybricks-app-harmony-module"]?.config?.publishApiConfig?.publishApi;
+    mySetting["mybricks-app-harmony-application"]?.config?.publishApiConfig?.publishApi;
 
   if (customPublishApi && !params.ignoreCustomPublish) {
     Logger.info("[publish] 有配置发布集成接口，尝试向发布集成接口推送数据...");

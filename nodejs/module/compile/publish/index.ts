@@ -15,14 +15,14 @@ const publish = async (params: any) => {
   const publishResult: any = await API.File.publish({
     userId,
     fileId,
-    extName: "harmony-module",
+    extName: "harmony-application",
     content: JSON.stringify(publishModule)
   })
 
   await API.Material.createCommonMaterial({
     userId,
     title: fileName,
-    type: "harmony-module",
+    type: "harmony-application",
     namespace: `mybricks.harmony.module.${fileId}`,
     scene: null,
     content: JSON.stringify({ 

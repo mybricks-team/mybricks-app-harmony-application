@@ -158,7 +158,7 @@ export default function ({
         onSearchUser: (keyword: string) => {
           return new Promise(async (resolve, reject) => {
             try {
-              const res = await searchUser(`api/harmony-module/miniapp/searchUser`, {
+              const res = await searchUser(`api/harmony-application/miniapp/searchUser`, {
                 keyword,
               });
               // @ts-ignore
@@ -223,17 +223,17 @@ export default function ({
               },
               onSuccess: async (params) => {
                 const { content, version } = params.materials[0];
-                await myRequire([`/api/harmony-module/getModule?moduleId=${content.moduleId}&version=${version}&origin=${location.origin}`], () => {})
+                await myRequire([`/api/harmony-application/getModule?moduleId=${content.moduleId}&version=${version}&origin=${location.origin}`], () => {})
                 resolve(window[`module_${content.moduleId}`])
               }
             }) 
             break;
           case "getModule":
-            await myRequire([`/api/harmony-module/getModule?moduleId=${moduleId}&version=${moduleVersion}&origin=${location.origin}`], () => {})
+            await myRequire([`/api/harmony-application/getModule?moduleId=${moduleId}&version=${moduleVersion}&origin=${location.origin}`], () => {})
             resolve(window[`module_${moduleId}`])
             break;
           case "getPage":
-            const res = await axios(`/api/harmony-module/loadPage?moduleId=${moduleId}&version=${moduleVersion}&pageId=${desc.pageId}`)
+            const res = await axios(`/api/harmony-application/loadPage?moduleId=${moduleId}&version=${moduleVersion}&pageId=${desc.pageId}`)
             resolve(res.data.data)
             break;
           default:

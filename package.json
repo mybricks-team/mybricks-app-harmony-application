@@ -1,7 +1,7 @@
 {
-  "name": "mybricks-app-harmony-module",
-  "version": "0.0.14",
-  "description": "可视化搭建鸿蒙模块，下载源码，与原有应用无缝集成",
+  "name": "mybricks-app-harmony-application",
+  "version": "0.0.1",
+  "description": "可视化搭建鸿蒙应用，下载源码",
   "scripts": {
     "start:dev": "NODE_ENV=development node nodejs/index.ts",
     "start:watch": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.ts'",
@@ -56,10 +56,10 @@
     "registry": "https://registry.npmjs.org/"
   },
   "mybricks": {
-    "name": "mybricks-app-harmony-module",
-    "extName": "harmony-module",
-    "icon": "/mybricks-app-harmony-module/public/icon.svg",
-    "title": "鸿蒙模块",
+    "name": "mybricks-app-harmony-application",
+    "extName": "harmony-application",
+    "icon": "/mybricks-app-harmony-application/public/icon.svg",
+    "title": "鸿蒙应用",
     "setting": "setting.html"
   },
   "nodemonConfig": {
