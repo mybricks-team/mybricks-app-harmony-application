@@ -23,7 +23,7 @@ const compilerHarmonyApp = async (params, config) => {
   const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson } = data;
 
   // 目标项目路径
-  const targetAppPath = path.join(projectPath, "Application");
+  const targetAppPath = path.join(projectPath, `Application_${new Date().getTime()}`);
   // 拷贝项目
   await fse.copy(path.join(__dirname, "./template/Application"), targetAppPath, { overwrite: true }) // [临时注释]
 

@@ -1,7 +1,7 @@
 {
   "name": "mybricks-app-harmony-application",
-  "version": "0.0.3",
-  "description": "可视化搭建鸿蒙应用，下载源码",
+  "version": "0.0.4",
+  "description": "可视化、模块化搭建鸿蒙应用，可导出下载应用的ArkTS源码",
   "scripts": {
     "start:dev": "NODE_ENV=development node nodejs/index.ts",
     "start:watch": "nodemon --ext js,ts --exec 'NODE_ENV=development MYBRICKS_PLATFORM_ADDRESS=https://my.mybricks.world node nodejs/index.ts'",

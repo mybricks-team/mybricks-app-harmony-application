@@ -1,5 +1,6 @@
 
 import { checkValueType, getValidSlotStyle, getValidSizeValue } from './helper'
+export { getDSLPrompts } from './prompt'
 
 /**
  * @description Json遍历器，支持对不同类型的节点注册修改函数
@@ -377,12 +378,19 @@ export const getNewDSL = (type, dslJson) => {
   if (type === 'geo' && dslJson?.ui) {
     try {
       const copyDslJson = JSON.parse(JSON.stringify(dslJson));
+
+      console.log(JSON.parse(JSON.stringify(copyDslJson)))
+
       traversal.traverse(copyDslJson?.ui)
+
+      console.log(JSON.parse(JSON.stringify(copyDslJson)))
+
       return copyDslJson
     } catch (error) {
       console.warn('解析失败')
       console.error(error)
     }
   }
+  
   return dslJson
 }

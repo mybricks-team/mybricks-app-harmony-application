@@ -884,9 +884,9 @@ export default function ({
     // aiView: getAiView(appConfig?.publishLocalizeConfig?.enableAI, {
     //   model: appConfig?.publishLocalizeConfig?.selectAIModel
     // }), // TODO: 开发settings页面后再放开注释
-    // aiView: getAiView(true, {
-    //   model: DEFAULT_AI_MODEL,
-    // }),
+    aiView: getAiView(true, {
+      model: DEFAULT_AI_MODEL,
+    }),
     com: {
       env: {
         callConnector(connector, params, connectorConfig) {
