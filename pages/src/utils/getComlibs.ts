@@ -6,9 +6,12 @@ import {
 import { compareVersions } from "compare-versions";
 const legacyLibs = [MP_BASIC_COM_LIB]
 
-const getLibsFromConfig = (appData: Record<string, any>, isHarmony = false) => {
+const getLibsFromConfig = (params) => {
+  const { appData, appConfig , isHarmony = false} = params
   if (isHarmony) {
-    return [HARMONY_COM_LIB]
+    return [{
+      editJs: appConfig?.comlibs?.url || HARMONY_COM_LIB.editJs
+    }]
   }
 
   let libs = [];

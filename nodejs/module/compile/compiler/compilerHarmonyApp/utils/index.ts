@@ -5,3 +5,4 @@ export { default as getUsedComponent } from './getUsedComponent';
 export { default as getModules } from "./getModules";
 export * from "./string";
 export * from "./code";
+export * from "./download";

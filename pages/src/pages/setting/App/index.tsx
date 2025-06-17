@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import useConfig from "./useConfig";
 import ConfigDesigner from "./ConfigDesigner";
 import ConfigServer from "./ConfigServer";
+import ConfigComlibs from "./ConfigComlibs";
 export const _NAMESPACE_ = APP_NAME;
 import style from "./app.less";
 import { Collapse, Spin } from "antd";
@@ -22,6 +23,10 @@ export default (props) => {
       >
         <Collapse.Panel key={0} header="设计器">
           <ConfigDesigner {...configContext} />
+        </Collapse.Panel>
+
+        <Collapse.Panel key={0} header="组件库">
+          <ConfigComlibs {...configContext} />
         </Collapse.Panel>
 
         <Collapse.Panel key={0} header="服务扩展">

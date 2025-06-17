@@ -143,17 +143,6 @@ const Designer = ({ appData }) => {
     (window as any).designerRef = designerRef
   }, [])
 
-  const [ctx] = useState({
-    sdk: appData,
-    user: appData.user,
-    comlibs: getLibsFromConfig(appData, isDesignFilePlatform('harmony')),
-    latestComlibs: [],
-    hasMaterialApp: appData.hasMaterialApp,
-    setting: appData.config || {},
-  });
-
-  const [latestComlibs, setLatestComlibs] = useState<[]>();
-
   const appConfig = useMemo(() => {
     let config = null;
     try {
@@ -167,6 +156,17 @@ const Designer = ({ appData }) => {
     }
     return config || {};
   }, [appData.config[APP_NAME]?.config]);
+
+  const [ctx] = useState({
+    sdk: appData,
+    user: appData.user,
+    comlibs: getLibsFromConfig({appData, appConfig, isHarmony: isDesignFilePlatform('harmony')}),
+    latestComlibs: [],
+    hasMaterialApp: appData.hasMaterialApp,
+    setting: appData.config || {},
+  });
+
+  const [latestComlibs, setLatestComlibs] = useState<[]>();
 
   const designer = useMemo(() => {
     const staticDesignerVerion = extractVersion(DESIGNER_STATIC_PATH);
@@ -1231,6 +1231,7 @@ const Designer = ({ appData }) => {
             type,
             data: {
               ...json,
+              comlibs: appConfig.comlibs,
               services: toJson.services,
               serviceFxUrl: pageModel.appConfig.serviceFxUrl,
               database: pageModel.appConfig.datasource,

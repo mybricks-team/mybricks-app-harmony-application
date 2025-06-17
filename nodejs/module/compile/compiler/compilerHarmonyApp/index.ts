@@ -3,6 +3,7 @@ import * as path from "path";
 import * as fse from "fs-extra";
 import { pinyin, cleanAndSplitString, firstCharToUpperCase } from "./utils";
 import API from "@mybricks/sdk-for-app/api";
+import * as AdmZip from 'adm-zip';
 import {
   getPageCode,
   handleModuleCode,
@@ -11,7 +12,8 @@ import {
   getUsedComponent,
   handleEntryCode,
   handleGlobalCode,
-  getModules
+  getModules,
+  downloadZip
 } from "./utils";
 
 /** 组件、控制器等导出路径 */
@@ -20,7 +22,7 @@ const PROXY_PACKAGE_NAME = "../_proxy/Index"
 const compilerHarmonyApp = async (params, config) => {
   const { data, projectPath, projectName, fileName, depModules, origin, type, fileId } = params;
   const { Logger } = config;
-  const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson } = data;
+  const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson, comlibs } = data;
 
   // 目标项目路径
   const targetAppPath = path.join(projectPath, `Application_${new Date().getTime()}`);
@@ -29,6 +31,21 @@ const compilerHarmonyApp = async (params, config) => {
 
   // est路径
   const targetEtsPath = path.join(targetAppPath, "entry/src/main/ets");
+
+  if (comlibs?.url) {
+    // 配置组件库，使用远程组件库源码
+    const comlibZipPath = path.join(targetAppPath, "comlib.zip");
+    await downloadZip({
+      url: comlibs.url.replace("edit.js", "comlib.zip"),
+      targetPath: comlibZipPath
+    })
+    const zip = new AdmZip(comlibZipPath);
+    const comlibPath = path.join(targetEtsPath, "comlib");
+    fse.removeSync(comlibPath)
+    zip.extractAllTo(comlibPath, true);
+    // 删除下载的zip包
+    fse.removeSync(comlibZipPath);
+  }
 
   /** 记录场景ID的映射关系 */
   const sceneMap = {}
