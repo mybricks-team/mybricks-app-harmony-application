@@ -1,5 +1,5 @@
 
-import { checkValueType, getValidSlotStyle, getValidSizeValue } from './helper'
+import { checkValueType, getValidSlotStyle, getValidSizeValue, getValidBackground } from './helper'
 export { getDSLPrompts } from './prompt'
 
 /**
@@ -140,18 +140,6 @@ traversal.registerModifier('root', (root) => {
     layout: root.style?.flexDirection === 'row' ? 'flex-row' : 'flex-column',
     flexDirection: root.style?.flexDirection === 'row' ? 'row' : 'column'
   }
-
-  const child0 = root.comAry?.[0];
-  if (!root.style?.width && child0.namespace === 'mybricks.basic-comlib.antd5.popup') {
-    const child0width = child0.style.width;
-    if (checkValueType(child0width) === 'number') {
-      root.style.width = getValidSizeValue(child0width)
-    }
-  }
-  if (!root.style?.height && child0.namespace === 'mybricks.basic-comlib.antd5.popup') {
-    const child0height = child0.style.height;
-    root.style.height = child0height
-  }
 })
 
 // 添加对插槽的处理
@@ -221,6 +209,24 @@ traversal.registerModifier('flex', (component) => {
     }
 
     delete rootStyle.position
+  }
+
+  // 兼容一些样式加到了layout上的情况
+  if (component.style) {
+    if (component.style?.backgroundColor) {
+      if (!component?.style?.styleAry?.[0]) {
+        component.style.styleAry = [
+          {
+            selector: ':root',
+            css: {}
+          }
+        ]
+      }
+      component.style.styleAry[0].css = {
+        backgroundColor: component.style?.backgroundColor
+      }
+      delete component.style?.backgroundColor
+    }
   }
 
   const shouldTransformToGrid = component.style?.flexDirection === 'row' && component?.comAry?.some(com => {
@@ -372,6 +378,42 @@ traversal.registerModifier('flex', (component) => {
     height: getValidSizeValue(component.style?.height, 'auto'),
   }
   delete component.comAry
+})
+
+// 添加对根结点的处理
+traversal.registerModifier('system.page', (component) => {
+  component.namespace = 'mybricks.harmony.systemPage'
+  component.data = {
+    layout: getValidSlotStyle(component.style)
+  }
+
+  component.data.navigationBarTitleText = component.title
+  component.data.useTabBar = false
+
+  if (component?.style?.styleAry?.[0]) {
+    const background = getValidBackground(component?.style?.styleAry?.[0]?.css ?? {})
+    component.data.backgroundColor = background?.backgroundColor;
+    component.data.backgroundImage = background?.backgroundImage;
+  
+    delete component?.style?.styleAry
+  }
+  component.asRoot = true
+})
+
+traversal.registerModifier('mybricks.harmony.text', (component) => {
+  if (component?.style?.styleAry) {
+    component?.style?.styleAry.forEach(item => {
+      if (!item.css) {
+        item.css = {}
+      }
+      if (item.css?.fontSize) {
+        const realFontSize = String(item.css.fontSize)?.indexOf('px') > -1 ? parseFloat(item.css.fontSize) : item.css.fontSize
+        if (realFontSize > 14) {
+          item.css.lineHeight = `${realFontSize + 6}px`
+        }
+      }
+    })
+  }
 })
 
 export const getNewDSL = (type, dslJson) => {

@@ -21,7 +21,7 @@ class Tabbar {
     window.__tabbar__.set = (value) => {
       tabbar = value;
       handlers.forEach((item) => {
-        item.handler(tabbar);
+        item?.(tabbar);
       });
     };
 
@@ -30,21 +30,18 @@ class Tabbar {
       tabbar = tabbar.filter((item) => item.scene.id !== id);
 
       handlers.forEach((item) => {
-        item.handler(tabbar);
+        item?.(tabbar);
       });
     };
 
     // 监听 tabbar
-    window.__tabbar__.on = (key, handler) => {
-      handlers.push({
-        key,
-        handler,
-      });
+    window.__tabbar__.on = (handler) => {
+      handlers.push(handler);
     };
 
     // 取消监听 tabbar
-    window.__tabbar__.off = (key) => {
-      handlers = handlers.filter((item) => item.key !== key);
+    window.__tabbar__.off = (handler) => {
+      handlers = handlers.filter((item) => item !== handler);
     };
   };
 }

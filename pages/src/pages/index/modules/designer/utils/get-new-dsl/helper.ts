@@ -53,3 +53,47 @@ export function getValidSizeValue(value, defaultValue: string | number = 0) {
   const numStr = strValue.endsWith('px') ? strValue.slice(0, -2) : strValue;
   return isNumber(numStr) ? parseFloat(numStr) : defaultValue;
 }
+
+
+interface BackgroundResult {
+  backgroundColor?: string;
+  backgroundImage?: string;
+}
+
+/** 提取有效的背景色 */
+export function getValidBackground(styles: any): BackgroundResult {
+  const result: BackgroundResult = {};
+
+  // 处理单独的backgroundColor
+  if (styles.backgroundColor) {
+    result.backgroundColor = styles.backgroundColor;
+  }
+
+  // 处理单独的backgroundImage
+  if (styles.backgroundImage) {
+    result.backgroundImage = styles.backgroundImage;
+  }
+
+  // 处理复合的background属性
+  if (styles.background) {
+    const background = styles.background.toString();
+
+    // 提取颜色值
+    // 匹配颜色格式: #XXX, #XXXXXX, rgb(), rgba(), hsl(), hsla(), 颜色关键字
+    const colorRegex = /(#[0-9A-Fa-f]{3,6}|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|[a-zA-Z]+)/;
+    const colorMatch = background.match(colorRegex);
+    if (colorMatch && !result.backgroundColor) {
+      result.backgroundColor = colorMatch[0];
+    }
+
+    // 提取图片url或渐变
+    // 匹配url()或各种渐变函数
+    const imageRegex = /(url\([^)]+\)|linear-gradient\([^)]+\)|radial-gradient\([^)]+\)|conic-gradient\([^)]+\))/;
+    const imageMatch = background.match(imageRegex);
+    if (imageMatch && !result.backgroundImage) {
+      result.backgroundImage = imageMatch[0];
+    }
+  }
+
+  return result;
+}
