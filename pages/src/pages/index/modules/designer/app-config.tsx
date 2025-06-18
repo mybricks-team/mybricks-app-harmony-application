@@ -1238,18 +1238,24 @@ function getDesignerParams(args) {
 
   switch (true) {
     case extraOption?.expert === 'image': {
-      model = 'anthropic/claude-3.7-sonnet';
+      model = 'anthropic/claude-sonnet-4';
       role = 'image'
       break;
     }
     case ['image'].includes(extraOption?.aiRole): {
-      model = 'anthropic/claude-3.7-sonnet';
+      model = 'anthropic/claude-sonnet-4';
       role = 'image'
       break
     }
     case ['architect'].includes(extraOption.aiRole): {
-      model = 'openai/gpt-4o-2024-11-20';
+      model = 'google/gemini-2.5-pro-preview';
+      // model = 'deepseek/deepseek-r1-0528'
       role = 'architect'
+      break
+    }
+    case ['expert'].includes(extraOption.aiRole): {
+      model = 'anthropic/claude-sonnet-4';
+      role = 'expert'
       break
     }
     default: {
@@ -1274,6 +1280,7 @@ const getAiView = (enableAI, option) => {
       getNewDSL,
       async requestAsStream(messages, ...args) {
         const { context, tools, model, role } = getDesignerParams(args);
+        debugger
         const { write, complete, error, cancel } = context ?? {};
         // 用于debug用户当前使用的模型
         window._ai_use_model_ = model;
@@ -1388,7 +1395,7 @@ const getAiView = (enableAI, option) => {
               body: JSON.stringify(
                 APP_ENV === 'production' ? getAiEncryptData({
                   model,
-                  // role,
+                  role,
                   messages,
                   tools,
                   tool_choice: 'auto',
