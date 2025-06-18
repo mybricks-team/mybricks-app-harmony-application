@@ -225,5 +225,25 @@ function getContentHash (fileContent, len = 8) {
   return crypto.createHash('md5').update(fileContent ?? Math.random()).digest('hex').slice(0, len);
 }
 
+export function getRealHostName(requestHeaders) {
+  let hostName = requestHeaders.host
+  if(requestHeaders['x-forwarded-host']) {
+    hostName = requestHeaders['x-forwarded-host']
+  } else if(requestHeaders['x-host']) {
+    hostName = requestHeaders['x-host'].replace(':443', '')
+  }
+  return hostName
+}
+
+export function getRealDomain(request) {
+  if (!request) { return ''; }
+  const { origin } = request.headers
+  if (origin) return origin
+  let hostName = getRealHostName(request.headers);
+  let protocol = request.headers?.['connection'].toLowerCase() === 'upgrade' ? 'https' : 'http'
+  let domain = `${protocol}:\/\/${hostName}`
+  return domain
+}
+
 export * from "./pinyin"
 export * from "./string"

@@ -77,6 +77,7 @@ function getComs() {
 
 export default function ({
   ctx,
+  appData,
   pageModel,
   save,
   designerRef,
@@ -246,12 +247,10 @@ export default function ({
       // return Promise.resolve(undefined)
       return contentModel.getMetaContent();
     },
-    ...(ctx.hasMaterialApp && !isDesignFilePlatform('harmony')
-      ? {
-        comLibAdder: comLibAdderFunc(ctx),
-      }
-      : {}),
-    comLibLoader: comlibLoaderFunc(ctx),
+    // comLibAdder: appData.comLibAdder(ctx),
+    comLibLoader: appData.comLibLoader({
+      comlibs: ctx.comlibs
+    }),
     pageContentLoader: async (sceneId) => {
       await contentModel.isOpenedPagesContentLoad();
       const cont = await contentModel.getPageContent({ sceneId });

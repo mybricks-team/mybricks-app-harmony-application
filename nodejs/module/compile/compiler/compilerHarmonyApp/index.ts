@@ -20,7 +20,7 @@ import {
 const PROXY_PACKAGE_NAME = "../_proxy/Index"
 
 const compilerHarmonyApp = async (params, config) => {
-  const { data, projectPath, projectName, fileName, depModules, origin, type, fileId } = params;
+  const { data, projectPath, projectName, fileName, depModules, origin, type, fileId, domainName } = params;
   const { Logger } = config;
   const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson, comlibs } = data;
 
@@ -32,11 +32,11 @@ const compilerHarmonyApp = async (params, config) => {
   // est路径
   const targetEtsPath = path.join(targetAppPath, "entry/src/main/ets");
 
-  if (comlibs?.url) {
+  if (comlibs?.[0].hmCode) {
     // 配置组件库，使用远程组件库源码
     const comlibZipPath = path.join(targetAppPath, "comlib.zip");
     await downloadZip({
-      url: comlibs.url.replace("edit.js", "comlib.zip"),
+      url: `${domainName}${comlibs?.[0].hmCode}`,
       targetPath: comlibZipPath
     })
     const zip = new AdmZip(comlibZipPath);
