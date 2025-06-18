@@ -18,18 +18,23 @@ export const getDSLPrompts = () => {
   注意：
   **page.dsl文件**
     page.dsl文件为页面的结构文件，以<root/>作为根节点，通过组件、插槽、布局(flex row 或 flex column）等元素构成页面的UI结构。
+
+    嵌套规则
+    1. page标签、flex标签可以直接嵌套子组件，无需slots插槽即可渲染子组件；
+    2. 所有组件的子组件必须由插槽来渲染，没有插槽不可渲染子组件；
+
     注意：
     1、页面文件的格式为 **dsl**，文件名为 **page.dsl**；
-    2、页面文件的根元素为<page/>，对于page组件，可以使用title属性，同时地下必须为system.page组件
-      - title: 页面的标题
+    2、页面文件的根元素为<page/>，对于page组件，可以使用title属性，同时子组件必须为system.page组件
+      - title:页面的标题
     3、对于system.page组件，只能使用title、styleAry两个属性:
-      - title: 页面的标题
+      - title:页面的标题
       - styleAry:
         - selector为 :root ，可以配置 background 属性
     4、对于flex标签：
       4.1、flex可以直接渲染子组件；
       4.2、flex只能使用title、layout、styleAry、column、row五个属性:
-        - title:组件的标题，用于描述组件的功能；
+        - title:必填，标题，语义化描述当前布局的功能；
         - layout:
           - width：百分比、数字、fit-content三者其一，默认值为fit-content；
           - height：数字、fit-content二者其一；
@@ -56,6 +61,12 @@ export const getDSLPrompts = () => {
           - margin:仅允许配置marginLeft、marginRight、marginTop、marginBottom，不可合并；
         - styleAry:组件的样式，以选择器(selector）的形式表现组件各组成部分的样式，这里要严格遵循<允许使用的组件/>中各组件定义的样式规范；
         - data:组件的数据，用于描述组件的状态、属性等信息；
+
+  <语法限制>
+  - 所有标签的props和模板语法中禁止使用javascript中的动态语法，比如函数、模板字符串、多元表达式等等，仅可以使用基本的数据类型，包括数组和对象；
+  - 不允许使用类似 <!-- XXX --> 等任何格式的注释信息；
+  - 对于样式单位，禁止使用calc、css变量这类特殊语法，也不允许使用vw和vh这种特殊单位；
+  </语法限制>
   
   <搭建画布信息>
   当前搭建画布的宽度为375，所有元素的尺寸需要关注此信息，且尽可能自适应布局。
@@ -69,6 +80,7 @@ export const getDSLPrompts = () => {
   1. 基础布局必须使用flex组件，禁止使用容器(mybricks.harmony.containerBasic)；
   2. 文本、图片、图标、按钮组件属于基础组件，任何情况下都可以优先使用，即使不在允许使用的组件里；
   3. 图标禁止使用emoji或者特殊符号，使用图标(mybricks.harmony.icon)组件来替代；
+  4. 尽可能使用margin替代padding，多注意组件是否需要配置margin；
   </组件使用建议>
 
   <组件特殊声明>
