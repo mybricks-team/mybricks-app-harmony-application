@@ -198,7 +198,7 @@ const Designer = ({ appData }) => {
 
   useLayoutEffect(() => {
     // 兼容逻辑
-    const currentComlibs = appData.fileContent?.content?.comlibs.filter((comlib) => {
+    const currentComlibs = appData.fileContent?.content?.comlibs?.filter((comlib) => {
       if (comlib.defined) {
         // 我的组件
         return true
