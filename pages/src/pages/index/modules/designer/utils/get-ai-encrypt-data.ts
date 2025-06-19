@@ -1,6 +1,13 @@
 import { Utils } from '@mybricks/sdk-for-ai'
 
-export const getAiEncryptData = Utils.getAiEncryptData
+export const aiUtils = {
+  get getAiEncryptData () {
+    if (window._ai_test_) {
+      return (data) => data
+    }
+    return Utils.getAiEncryptData
+  }
+}
 
 // const generateRandomKey = (length) => {
 //   const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";

@@ -18,7 +18,7 @@ import { editorAppenderFn } from "./editorAppender";
 import { showAIPageModal, HarmonyPrompts, HarmonyDefinitions } from '@mybricks/sdk-for-ai'
 import { COMPONENT_NAMESPACE, LOCAL_EDITOR_ASSETS } from "@/constants";
 import { MpConfig, CompileConfig } from "./custom-configs";
-import { getAiEncryptData } from "./utils/get-ai-encrypt-data";
+import { aiUtils } from "./utils/get-ai-encrypt-data";
 import { getNewDSL, getDSLPrompts, getExamplePrompts } from './utils/get-new-dsl'
 import extendsConfig from "./configs/extends";
 // import systemContent from "./system.txt";
@@ -1395,7 +1395,7 @@ const getAiView = (enableAI, option) => {
               },
               signal: cancelControl?.signal,
               body: JSON.stringify(
-                APP_ENV === 'production' ? getAiEncryptData({
+                APP_ENV === 'production' ? aiUtils.getAiEncryptData({
                   model,
                   role,
                   messages,
