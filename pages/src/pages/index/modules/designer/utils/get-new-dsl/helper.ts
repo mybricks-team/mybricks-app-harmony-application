@@ -97,3 +97,16 @@ export function getValidBackground(styles: any): BackgroundResult {
 
   return result;
 }
+
+export function uuid() {
+  // 定义字符集，包含大小写字母和数字
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  // 初始化结果字符串，以 'u_' 开头
+  let result = 'u_';
+  // 循环 5 次，随机选择字符集中的字符拼接到结果字符串中
+  for (let i = 0; i < 5; i++) {
+    result += characters.charAt(Math.floor(Math.random() * characters.length));
+  }
+  // 返回生成的 ID
+  return result;
+}

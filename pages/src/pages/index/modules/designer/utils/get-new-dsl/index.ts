@@ -1,5 +1,5 @@
 
-import { checkValueType, getValidSlotStyle, getValidSizeValue, getValidBackground } from './helper'
+import { checkValueType, getValidSlotStyle, getValidSizeValue, getValidBackground, uuid } from './helper'
 export { getDSLPrompts } from './prompt'
 
 /**
@@ -164,6 +164,25 @@ traversal.registerModifier('component', (component) => {
 
 // 添加对flex节点的处理
 traversal.registerModifier('flex', (component) => {
+
+  // 兼容把样式写到 layout 的情况
+  if (component.style) {
+    const { width, height, justifyContent, alignItems, flex, styleAry, ...extra } = component.style
+
+    if (!component?.style?.styleAry) {
+      component.style.styleAry = [
+        {
+          selector: ':root',
+          css: {}
+        }
+      ]
+    }
+    component.style.styleAry[0].css = {
+      ...(component.style.styleAry[0]?.css ?? {}),
+      ...(extra ?? {})
+    }
+  }
+
   if (component?.style?.styleAry) {
     component?.style?.styleAry?.forEach?.(item => {
       if (!item.css) {
@@ -211,23 +230,23 @@ traversal.registerModifier('flex', (component) => {
     delete rootStyle.position
   }
 
-  // 兼容一些样式加到了layout上的情况
-  if (component.style) {
-    if (component.style?.backgroundColor) {
-      if (!component?.style?.styleAry?.[0]) {
-        component.style.styleAry = [
-          {
-            selector: ':root',
-            css: {}
-          }
-        ]
-      }
-      component.style.styleAry[0].css = {
-        backgroundColor: component.style?.backgroundColor
-      }
-      delete component.style?.backgroundColor
-    }
-  }
+  // // 兼容一些样式加到了layout上的情况
+  // if (component.style) {
+  //   if (component.style?.backgroundColor) {
+  //     if (!component?.style?.styleAry?.[0]) {
+  //       component.style.styleAry = [
+  //         {
+  //           selector: ':root',
+  //           css: {}
+  //         }
+  //       ]
+  //     }
+  //     component.style.styleAry[0].css = {
+  //       backgroundColor: component.style?.backgroundColor
+  //     }
+  //     delete component.style?.backgroundColor
+  //   }
+  // }
 
   const shouldTransformToGrid = component.style?.flexDirection === 'row' && component?.comAry?.some(com => {
     return !!com.style.flex || (checkValueType(com.style?.width) === 'percentage' && com.style?.width !== '100%')
@@ -400,23 +419,41 @@ traversal.registerModifier('system.page', (component) => {
   component.asRoot = true
 })
 
-traversal.registerModifier('mybricks.harmony.text', (component) => {
-  if (component?.style?.styleAry) {
-    component?.style?.styleAry.forEach(item => {
-      if (!item.css) {
-        item.css = {}
-      }
-      if (item.css?.fontSize) {
-        const realFontSize = String(item.css.fontSize)?.indexOf('px') > -1 ? parseFloat(item.css.fontSize) : item.css.fontSize
-        if (realFontSize > 14) {
-          item.css.lineHeight = `${realFontSize + 6}px`
-        }
+/** 是否注册组件的modifiers */
+let isComlibsModifiersRegisted = false
+/** 第一次的时候，注册下所有组件的modifiers */
+const registerComliibsModifiers = () => {
+  if (!window.__comlibs_edit_) {
+    return
+  }
+
+  const forEachComponent = (com, callback) => {
+    if (com?.namespace) {
+      callback?.(com)
+    }
+    if (Array.isArray(com?.comAray)) {
+      com?.comAray.forEach(child => {
+        forEachComponent(child, callback)
+      })
+    }
+  }
+
+  window.__comlibs_edit_.forEach(comlib => {
+    forEachComponent(comlib, (com) => {
+      if (com?.ai?.modifyTptJson) {
+        traversal.registerModifier(com.namespace, com?.ai?.modifyTptJson)
       }
     })
-  }
-})
+  })
+
+}
 
 export const getNewDSL = (type, dslJson) => {
+  if (!isComlibsModifiersRegisted) {
+    registerComliibsModifiers();
+    isComlibsModifiersRegisted = true
+  }
+
   if (type === 'geo' && dslJson?.ui) {
     try {
       const copyDslJson = JSON.parse(JSON.stringify(dslJson));
@@ -435,4 +472,32 @@ export const getNewDSL = (type, dslJson) => {
   }
   
   return dslJson
+}
+
+export const getExamplePrompts = () => {
+  return `
+  <example>
+    <user_query>搭建两个竖排的按钮，按钮宽度固定 + 铺满</user_query>
+    <assistant_response>
+    \`\`\`dsl file="page.dsl"
+      <page title="测试页面">
+        <system.page title="你好世界" styleAry={[{selector:":root",css:{background:"#FFFFFF"}}]}>
+          <slots.content title="页面内容" layout={{ alignItems: 'center' }}>
+            <mybricks.harmony.button 
+              title="按钮1" 
+              layout={{width: 50, height: 36}}
+              styleAry={[{selector:".mybricks-button",css:{"backgroundColor":"red"}}]}
+              data={{text:"按钮1"}}/>
+            <mybricks.harmony.button 
+              title="按钮2" 
+              layout={{width: '100%', height: 36}}
+              styleAry={[{selector:".mybricks-button",css:{"backgroundColor":"blue"}}]}
+              data={{text:"按钮2"}}/>
+          </slots.content>
+        </system.page>
+      </page>
+    \`\`\`
+    </assistant_response>
+  </example>
+  `
 }
