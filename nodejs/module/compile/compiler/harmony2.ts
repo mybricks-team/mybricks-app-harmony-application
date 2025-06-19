@@ -169,6 +169,7 @@ const handlePopupCode = (page: ReturnType<typeof toHarmonyCode>[0]) => {
           }
           .hideTitleBar(true)
           .mode(NavDestinationMode.DIALOG)
+          .systemTransition(NavigationSystemTransitionType.NONE)
         }
       }
   

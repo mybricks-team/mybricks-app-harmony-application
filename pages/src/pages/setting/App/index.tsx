@@ -25,10 +25,6 @@ export default (props) => {
           <ConfigDesigner {...configContext} />
         </Collapse.Panel>
 
-        <Collapse.Panel key={0} header="组件库">
-          <ConfigComlibs {...configContext} />
-        </Collapse.Panel>
-
         <Collapse.Panel key={0} header="服务扩展">
           <ConfigServer {...configContext} />
         </Collapse.Panel>

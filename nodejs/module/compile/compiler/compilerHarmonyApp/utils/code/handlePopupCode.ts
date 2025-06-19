@@ -25,7 +25,6 @@ const handlePopupCode = (page) => {
             Index()
           }
           .hideTitleBar(true)
-          .hideBackButton(true)
           .mode(NavDestinationMode.DIALOG)
           .systemTransition(NavigationSystemTransitionType.NONE)
         }

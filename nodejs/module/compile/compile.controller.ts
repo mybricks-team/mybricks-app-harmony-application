@@ -17,6 +17,7 @@ import {
   downloadAssetsFromPath,
   getComboFilesStringFromPath,
   localizeFile,
+  getRealDomain,
 } from "./utils";
 import { Logger } from "@mybricks/rocker-commons";
 import { compilerHarmony2, compilerHarmonyApp } from "./compiler";
@@ -97,6 +98,7 @@ export default class CompileController {
           fileName,
           depModules: getDepModules(data.depModules),
           origin: req.headers.origin,
+          domainName: getRealDomain(req),
           type,
           fileId,
         },

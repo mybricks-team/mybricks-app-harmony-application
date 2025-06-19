@@ -4,6 +4,7 @@ import React, {
   useEffect,
   useRef,
   useState,
+  useLayoutEffect
 } from "react";
 import { message, Modal, notification } from "antd";
 import { pageModel, userModel, contentModel, versionModel } from "@/stores";
@@ -27,7 +28,7 @@ import { useFxServices } from "../utils/use-fx-services";
 import { getLibsFromConfig } from "@/utils/getComlibs";
 import { sleep, isDesignFilePlatform } from "@/utils";
 import { CompileType } from "@/types";
-import { DESIGNER_STATIC_PATH } from "../../../../constants";
+import { DESIGNER_STATIC_PATH, HARMONY_COM_LIB } from "../../../../constants";
 import { ExclamationCircleFilled, CheckCircleFilled } from "@ant-design/icons";
 import cloneDeep from "lodash/cloneDeep"
 
@@ -160,7 +161,7 @@ const Designer = ({ appData }) => {
   const [ctx] = useState({
     sdk: appData,
     user: appData.user,
-    comlibs: getLibsFromConfig({appData, appConfig, isHarmony: isDesignFilePlatform('harmony')}),
+    comlibs: [],
     latestComlibs: [],
     hasMaterialApp: appData.hasMaterialApp,
     setting: appData.config || {},
@@ -183,17 +184,41 @@ const Designer = ({ appData }) => {
     return DESIGNER_STATIC_PATH;
   }, [appConfig]);
 
-  useMemo(() => {
+  const loadDesigner = useCallback(() => {
     if (designer) {
-      const script = document.createElement("script");
-      script.src = designer;
-      document.head.appendChild(script);
+      const script = document.createElement('script')
+      script.src = designer
+      document.head.appendChild(script)
       script.onload = () => {
-        (window as any).mybricks.SPADesigner &&
-          setSPADesigner((window as any).mybricks.SPADesigner);
-      };
+        ;(window as any).mybricks.SPADesigner &&
+          setSPADesigner((window as any).mybricks.SPADesigner)
+      }
     }
-  }, [designer]);
+  }, [designer])
+
+  useLayoutEffect(() => {
+    // 兼容逻辑
+    const currentComlibs = appData.fileContent?.content?.comlibs?.filter((comlib) => {
+      if (comlib.defined) {
+        // 我的组件
+        return true
+      } else if (comlib.material_id) {
+        // 来自物料中心
+        return true
+      }
+      // 清理脏数据
+      return false;
+    })
+
+    appData.getInitComLibs({
+      localComlibs: [HARMONY_COM_LIB],
+      currentComlibs: currentComlibs?.length ? currentComlibs : null,
+    }).then(({ comlibs, latestComlibs }) => {
+      const newComlibs = comlibs
+      ctx.comlibs = newComlibs;
+      ctx.latestComlibs = latestComlibs;
+    }).finally(loadDesigner)
+  }, [designer])
 
   useEffect(() => {
     const needSearchComlibs = ctx.comlibs.filter(
@@ -1231,7 +1256,9 @@ const Designer = ({ appData }) => {
             type,
             data: {
               ...json,
-              comlibs: appConfig.comlibs,
+              comlibs: ctx.comlibs.filter((comlib) => {
+                return comlib.material_id
+              }),
               services: toJson.services,
               serviceFxUrl: pageModel.appConfig.serviceFxUrl,
               database: pageModel.appConfig.datasource,
@@ -1464,6 +1491,7 @@ const Designer = ({ appData }) => {
               ctx: window?.mybricks?.createObservable(
                 Object.assign(ctx, { latestComlibs })
               ),
+              appData,
               pageModel: window?.mybricks?.createObservable(pageModel),
               save: onSave,
               designerRef,
