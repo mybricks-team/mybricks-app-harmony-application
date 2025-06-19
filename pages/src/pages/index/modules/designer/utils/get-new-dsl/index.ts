@@ -133,7 +133,7 @@ function polyfillComponentStyle(style) {
 /** 当组件出现幻觉使用了flex1时 */
 function polyfillWhenComponentUseFlex(component) {
   if (Array.isArray(component?.comAry)) {
-    const findIndex = component?.comAry.findIndex(com => component.namespace !== 'flex' && component?.style?.flex !== undefined);
+    const findIndex = component?.comAry.findIndex(com => com.namespace !== 'flex' && com?.style?.flex !== undefined);
     if (findIndex > -1) {
       const targerComp = component.comAry[findIndex];
       component.comAry = [
