@@ -1,6 +1,6 @@
 
-import { checkValueType, getValidSlotStyle, getValidSizeValue, getValidBackground, uuid } from './helper'
-export { getDSLPrompts } from './prompt'
+import { checkValueType, getValidSlotStyle, getValidSizeValue, transformToValidBackground, transformToValidStyleAry, fixCompileErrorStyle, uuid } from './helper'
+export { getDSLPrompts, getSystemPrompts } from './prompt'
 
 /**
  * @description Json遍历器，支持对不同类型的节点注册修改函数
@@ -31,6 +31,9 @@ class DslJsonTraversal {
   private traverseComponent(component) {
     if (!component) return;
 
+    const modifierBefore = this.modifiers.get('component:before');
+    modifierBefore?.(component);
+
     // 检查是否有对应的修改器
     if (component.namespace && this.modifiers.has(component.namespace)) {
       const modifier = this.modifiers.get(component.namespace);
@@ -38,8 +41,8 @@ class DslJsonTraversal {
       modifier?.(component);
     }
 
-    const modifier = this.modifiers.get('component');
-    modifier?.(component);
+    const modifierAfter = this.modifiers.get('component:after');
+    modifierAfter?.(component);
 
     // 继续遍历slots
     if (component.slots) {
@@ -127,6 +130,30 @@ function polyfillComponentStyle(style) {
   return style
 }
 
+/** 当组件出现幻觉使用了flex1时 */
+function polyfillWhenComponentUseFlex(component) {
+  if (Array.isArray(component?.comAry)) {
+    const findIndex = component?.comAry.findIndex(com => component.namespace !== 'flex' && component?.style?.flex !== undefined);
+    if (findIndex > -1) {
+      const targerComp = component.comAry[findIndex];
+      component.comAry = [
+        {
+          id: uuid(),
+          title: '占满剩余宽度',
+          namespace: 'flex',
+          style: {
+            flex: 1,
+            flexDirection: 'row',
+            height: targerComp.style?.height
+          },
+          comAry: [targerComp]
+        }
+      ]
+      delete targerComp.style.flex
+      targerComp.style.width = '100%'
+    }
+  }
+}
 
 const traversal = new DslJsonTraversal();
 
@@ -156,8 +183,15 @@ traversal.registerModifier('slot', (slot) => {
   }
 })
 
+// 添加对所有组件的样式兼容
+traversal.registerModifier('component:before', (component) => {
+  fixCompileErrorStyle(component.style ?? {})
+  polyfillWhenComponentUseFlex(component)
+  transformToValidStyleAry(component?.style?.styleAry)
+})
+
 // 添加对所有组件的通用处理
-traversal.registerModifier('component', (component) => {
+traversal.registerModifier('component:after', (component) => {
   polyfillComponentStyle(component.style)
   polyfillComponentStyAry(component.style?.styleAry)
 })
@@ -410,10 +444,14 @@ traversal.registerModifier('system.page', (component) => {
   component.data.useTabBar = false
 
   if (component?.style?.styleAry?.[0]) {
-    const background = getValidBackground(component?.style?.styleAry?.[0]?.css ?? {})
-    component.data.backgroundColor = background?.backgroundColor;
-    component.data.backgroundImage = background?.backgroundImage;
-  
+    transformToValidBackground(component?.style?.styleAry?.[0]?.css ?? {})
+    const cssProperties = component?.style?.styleAry?.[0]?.css
+    if (cssProperties?.backgroundColor) {
+      component.data.backgroundColor = cssProperties?.backgroundColor
+    }
+    if (cssProperties?.backgroundImage) {
+      component.data.backgroundImage = cssProperties?.backgroundImage
+    }
     delete component?.style?.styleAry
   }
   component.asRoot = true

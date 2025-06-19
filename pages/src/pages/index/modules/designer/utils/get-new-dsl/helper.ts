@@ -54,48 +54,184 @@ export function getValidSizeValue(value, defaultValue: string | number = 0) {
   return isNumber(numStr) ? parseFloat(numStr) : defaultValue;
 }
 
+/** 
+ * 将background转换为有效的backgroundColor和backgroundImage
+ * @param styles 需要转换的样式对象
+ */
+export function transformToValidBackground(styles: any): void {
+  // 兼容下把渐变色配置到backgroundColor的情况
+  if (styles?.backgroundColor && styles?.backgroundColor?.indexOf('gradient') > -1) {
+    const imageRegex = /(url\([^)]+\)|linear-gradient\([^)]+\)|radial-gradient\([^)]+\)|conic-gradient\([^)]+\))/;
+    const imageMatch = styles.backgroundColor.match(imageRegex);
 
-interface BackgroundResult {
-  backgroundColor?: string;
-  backgroundImage?: string;
+    if (imageMatch && !styles.backgroundImage) {
+      styles.backgroundImage = imageMatch[0];
+    }
+
+    delete styles.backgroundColor
+  }
+
+  // 如果没有background属性,直接返回
+  if (!styles.background) {
+    return;
+  }
+
+  const background = styles.background.toString();
+
+  // 提取颜色值
+  // 匹配颜色格式: #XXX, #XXXXXX, rgb(), rgba(), hsl(), hsla(), 颜色关键字
+  const colorRegex = /(#[0-9A-Fa-f]{3,6}|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|[a-zA-Z]+)/;
+  const colorMatch = background.match(colorRegex);
+
+  // 提取图片url或渐变
+  // 匹配url()或各种渐变函数
+  const imageRegex = /(url\([^)]+\)|linear-gradient\([^)]+\)|radial-gradient\([^)]+\)|conic-gradient\([^)]+\))/;
+  const imageMatch = background.match(imageRegex);
+
+  // 删除原有的background属性
+  delete styles.background;
+
+  // 如果找到颜色值,设置backgroundColor
+  if (colorMatch && !styles.backgroundColor) {
+    styles.backgroundColor = colorMatch[0];
+  }
+
+  // 如果找到图片或渐变,设置backgroundImage
+  if (imageMatch && !styles.backgroundImage) {
+    styles.backgroundImage = imageMatch[0];
+  }
 }
 
-/** 提取有效的背景色 */
-export function getValidBackground(styles: any): BackgroundResult {
-  const result: BackgroundResult = {};
-
-  // 处理单独的backgroundColor
-  if (styles.backgroundColor) {
-    result.backgroundColor = styles.backgroundColor;
+/**
+ * 将margin简写转换为marginTop/Right/Bottom/Left
+ * @param styles 需要转换的样式对象
+ */
+export function transformToValidMargins(styles: any): void {
+  // 如果没有margin属性,直接返回
+  if (!styles.margin) {
+    return;
   }
 
-  // 处理单独的backgroundImage
-  if (styles.backgroundImage) {
-    result.backgroundImage = styles.backgroundImage;
+  const margin = styles.margin.toString().trim();
+  const values = margin.split(/\s+/); // 按空格分割
+
+  // 根据值的数量设置不同方向的margin
+  switch (values.length) {
+    case 1: // margin: 10px;
+      styles.marginTop = values[0];
+      styles.marginRight = values[0];
+      styles.marginBottom = values[0];
+      styles.marginLeft = values[0];
+      break;
+    case 2: // margin: 10px 20px;
+      styles.marginTop = values[0];
+      styles.marginRight = values[1];
+      styles.marginBottom = values[0];
+      styles.marginLeft = values[1];
+      break;
+    case 3: // margin: 10px 20px 30px;
+      styles.marginTop = values[0];
+      styles.marginRight = values[1];
+      styles.marginBottom = values[2];
+      styles.marginLeft = values[1];
+      break;
+    case 4: // margin: 10px 20px 30px 40px;
+      styles.marginTop = values[0];
+      styles.marginRight = values[1];
+      styles.marginBottom = values[2];
+      styles.marginLeft = values[3];
+      break;
   }
 
-  // 处理复合的background属性
-  if (styles.background) {
-    const background = styles.background.toString();
+  // 删除原有的margin属性
+  delete styles.margin;
+}
 
-    // 提取颜色值
-    // 匹配颜色格式: #XXX, #XXXXXX, rgb(), rgba(), hsl(), hsla(), 颜色关键字
-    const colorRegex = /(#[0-9A-Fa-f]{3,6}|rgb\([^)]+\)|rgba\([^)]+\)|hsl\([^)]+\)|hsla\([^)]+\)|[a-zA-Z]+)/;
-    const colorMatch = background.match(colorRegex);
-    if (colorMatch && !result.backgroundColor) {
-      result.backgroundColor = colorMatch[0];
+/**
+ * 将padding简写转换为paddingTop/Right/Bottom/Left
+ * @param styles 需要转换的样式对象
+ */
+export function transformToValidPaddings(styles: any): void {
+  // 如果没有padding属性,直接返回
+  if (!styles.padding) {
+    return;
+  }
+
+  const padding = styles.padding.toString().trim();
+  const values = padding.split(/\s+/); // 按空格分割
+
+  // 根据值的数量设置不同方向的padding
+  switch (values.length) {
+    case 1: // padding: 10px;
+      styles.paddingTop = values[0];
+      styles.paddingRight = values[0];
+      styles.paddingBottom = values[0];
+      styles.paddingLeft = values[0];
+      break;
+    case 2: // padding: 10px 20px;
+      styles.paddingTop = values[0];
+      styles.paddingRight = values[1];
+      styles.paddingBottom = values[0];
+      styles.paddingLeft = values[1];
+      break;
+    case 3: // padding: 10px 20px 30px;
+      styles.paddingTop = values[0];
+      styles.paddingRight = values[1];
+      styles.paddingBottom = values[2];
+      styles.paddingLeft = values[1];
+      break;
+    case 4: // padding: 10px 20px 30px 40px;
+      styles.paddingTop = values[0];
+      styles.paddingRight = values[1];
+      styles.paddingBottom = values[2];
+      styles.paddingLeft = values[3];
+      break;
+  }
+
+  // 删除原有的padding属性
+  delete styles.padding;
+}
+
+/** 如果maring直接配置-20这种情况，为不合理的语法，babel会转换成特定对象 */
+export function fixCompileErrorStyle(cssProps = {}) {
+  // 遍历所有属性
+  for (const key in cssProps) {
+    const value = cssProps[key];
+
+    // 检查是否是UnaryExpression对象
+    if (typeof value === 'object' && value !== null && value.type === 'UnaryExpression') {
+      // 检查是否是负数表达式
+      if (value.operator === '-' &&
+        value.prefix &&
+        value.argument.type === 'NumericLiteral') {
+
+        // 直接修改原对象的值为负数
+        cssProps[key] = -value.argument.value;
+      }
     }
-
-    // 提取图片url或渐变
-    // 匹配url()或各种渐变函数
-    const imageRegex = /(url\([^)]+\)|linear-gradient\([^)]+\)|radial-gradient\([^)]+\)|conic-gradient\([^)]+\))/;
-    const imageMatch = background.match(imageRegex);
-    if (imageMatch && !result.backgroundImage) {
-      result.backgroundImage = imageMatch[0];
-    }
   }
+}
 
-  return result;
+
+
+/** 转换成合法的 mybricks css 样式 */
+export function transformToValidCssStyle(cssProperties) {
+  if (!cssProperties) {
+    return {}
+  }
+  transformToValidBackground(cssProperties)
+  transformToValidMargins(cssProperties)
+  transformToValidPaddings(cssProperties)
+}
+
+/** 转换成合法的 mybricks styleAry 样式 */
+export function transformToValidStyleAry(styleAry) {
+  if (!Array.isArray(styleAry)) {
+    return styleAry
+  }
+  styleAry.forEach(config => {
+    transformToValidCssStyle(config?.css)
+  })
 }
 
 export function uuid() {

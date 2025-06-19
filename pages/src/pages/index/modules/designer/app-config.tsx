@@ -19,7 +19,7 @@ import { showAIPageModal, HarmonyPrompts, HarmonyDefinitions } from '@mybricks/s
 import { COMPONENT_NAMESPACE, LOCAL_EDITOR_ASSETS } from "@/constants";
 import { MpConfig, CompileConfig } from "./custom-configs";
 import { aiUtils } from "./utils/get-ai-encrypt-data";
-import { getNewDSL, getDSLPrompts, getExamplePrompts } from './utils/get-new-dsl'
+import { getNewDSL, getDSLPrompts, getExamplePrompts, getSystemPrompts } from './utils/get-new-dsl'
 import extendsConfig from "./configs/extends";
 // import systemContent from "./system.txt";
 import { message } from "antd";
@@ -1277,6 +1277,7 @@ const getAiView = (enableAI, option) => {
 
   if (enableAI) {
     return {
+      getSystemPrompts,
       getDSLPrompts,
       getExamplePrompts,
       getNewDSL,
