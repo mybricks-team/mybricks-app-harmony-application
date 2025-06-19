@@ -249,7 +249,8 @@ export default function ({
     },
     // comLibAdder: appData.comLibAdder(ctx),
     comLibLoader: appData.comLibLoader({
-      comlibs: ctx.comlibs
+      comlibs: ctx.comlibs,
+      cleanStyles: false,
     }),
     pageContentLoader: async (sceneId) => {
       await contentModel.isOpenedPagesContentLoad();
