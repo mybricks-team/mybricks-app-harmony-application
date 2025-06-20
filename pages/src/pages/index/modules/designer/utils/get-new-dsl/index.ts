@@ -377,6 +377,7 @@ traversal.registerModifier('flex', (component) => {
       }
     })
     component.comAry = undefined
+    delete component.style.flex
     delete component.comAry
 
     return
@@ -430,6 +431,7 @@ traversal.registerModifier('flex', (component) => {
     width: component.style?.flex === 1 ? '100%' : getValidSizeValue(component.style?.width, 'fit-content'),
     height: getValidSizeValue(component.style?.height, 'auto'),
   }
+  delete component.style.flex
   delete component.comAry
 })
 
