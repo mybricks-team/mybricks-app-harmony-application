@@ -136,19 +136,23 @@ function polyfillWhenComponentUseFlex(component) {
     const findIndex = component?.comAry.findIndex(com => com.namespace !== 'flex' && com?.style?.flex !== undefined);
     if (findIndex > -1) {
       const targerComp = component.comAry[findIndex];
-      component.comAry = [
-        {
-          id: uuid(),
-          title: '占满剩余宽度',
-          namespace: 'flex',
-          style: {
-            flex: 1,
-            flexDirection: 'row',
-            height: targerComp.style?.height
-          },
-          comAry: [targerComp]
+
+      component.comAry = component.comAry.map(com => {
+        if (com === targerComp) {
+          return {
+            id: uuid(),
+            title: '占满剩余宽度',
+            namespace: 'flex',
+            style: {
+              flex: 1,
+              flexDirection: 'row',
+              height: targerComp.style?.height
+            },
+            comAry: [targerComp]
+          }
         }
-      ]
+        return com
+      })
       delete targerComp.style.flex
       targerComp.style.width = '100%'
     }
