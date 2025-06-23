@@ -381,7 +381,6 @@ traversal.registerModifier('flex', (component) => {
       }
     })
     component.comAry = undefined
-    delete component.style.flex
     delete component.comAry
 
     if (component?.style?.flex) {
@@ -439,7 +438,6 @@ traversal.registerModifier('flex', (component) => {
     width: component.style?.flex === 1 ? '100%' : getValidSizeValue(component.style?.width, 'fit-content'),
     height: getValidSizeValue(component.style?.height, 'auto'),
   }
-<<<<<<< HEAD
 
   // 转换成containerBasic的类名
   if (component.style?.styleAry) {
@@ -450,9 +448,6 @@ traversal.registerModifier('flex', (component) => {
     })
   }
 
-=======
-  delete component.style.flex
->>>>>>> 37c5c49591ce44a008a6f28986892172c8191918
   delete component.comAry
 
   if (component?.style?.flex) {
