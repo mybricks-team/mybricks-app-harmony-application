@@ -172,7 +172,11 @@ const compilerHarmonyApp = async (params, config) => {
         .replace("$r('app._proxy.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
         .replace("$r('app._proxy.component.declared')", declaredComponentCode)
     );
-    fse.writeFileSync(path.join(targetEtsPath, `modules/${moduleName}/api.ets`), apiCode)
+
+    if (key !== "app") {
+      // app不需要api
+      fse.writeFileSync(path.join(targetEtsPath, `modules/${moduleName}/api.ets`), apiCode)
+    }
   
     // 写入搭建Js
     const jsCodePath = path.join(targetEtsPath, `modules/${moduleName}/_proxy/codes.js`);
