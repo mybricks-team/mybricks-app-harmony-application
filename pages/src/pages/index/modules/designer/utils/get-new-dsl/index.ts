@@ -383,6 +383,10 @@ traversal.registerModifier('flex', (component) => {
     component.comAry = undefined
     delete component.comAry
 
+    if (component?.style?.flex) {
+      delete component.style.flex
+    }
+
     return
   }
 
@@ -434,7 +438,21 @@ traversal.registerModifier('flex', (component) => {
     width: component.style?.flex === 1 ? '100%' : getValidSizeValue(component.style?.width, 'fit-content'),
     height: getValidSizeValue(component.style?.height, 'auto'),
   }
+
+  // 转换成containerBasic的类名
+  if (component.style?.styleAry) {
+    component.style?.styleAry.forEach(s => {
+      if (s.selector === ':root') {
+        s.selector = '> .mybricks-container'
+      }
+    })
+  }
+
   delete component.comAry
+
+  if (component?.style?.flex) {
+    delete component.style.flex
+  }
 })
 
 // 添加对根结点的处理
