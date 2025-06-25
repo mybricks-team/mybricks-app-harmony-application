@@ -8,6 +8,7 @@ import css from "./web.less";
 import help from "./icons/help"
 import { showHarmonyDownloadConfig } from "./model/downloadModel"
 import { CompileType } from "@/types";
+import { Export } from "./icons/export";
 
 interface WebToolbarProps {
   operable: boolean;
@@ -67,7 +68,7 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
     <>
       <Toolbar
         title={pageModel.file?.name}
-        updateInfo={<Toolbar.LastUpdate onClick={handleSwitch2SaveVersion} />}
+        updateInfo={<Toolbar.LastUpdate onClick={handleSwitch2SaveVersion} isModify={isModify} />}
       >
         <Locker
           statusChange={statusChange}
@@ -125,7 +126,15 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
         <Toolbar.Save disabled={!operable} onClick={onSave} dotTip={isModify} />
         {/* <Toolbar.Button disabled={!operable} onClick={publishHandle}>发布</Toolbar.Button> */}
         {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyModule })}>下载源码(模块)</Toolbar.Button> */}
-        <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>导出应用源码</Toolbar.Button>
+        <Tooltip
+          placement="bottom"
+          title={"下载源码"}
+        >
+        <div className={css.export_btn} onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>
+          {Export}
+        </div>
+        </Tooltip>
+        {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>导出应用源码</Toolbar.Button> */}
       </Toolbar>
     </>
   );
