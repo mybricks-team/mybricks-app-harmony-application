@@ -22,9 +22,9 @@ export const MP_BASIC_COM_LIB = {
 export const HARMONY_COM_LIB = {
   id: 'default',
   namespace: 'mybricks.normal-harmony.taro',
-  editJs: "./public/comlibs/comlib-harmony-normal/0.0.20/edit.js",
+  editJs: "./public/comlibs/comlib-harmony-normal/1.0.20/edit.js",
   // editJs: "https://127.0.0.1:8000/libEdt.js",
-  version: '0.0.19',
+  version: '1.0.20',
 }
 
 export const COMPONENT_NAMESPACE = {
@@ -132,5 +132,5 @@ export const LOCAL_EDITOR_ASSETS = {
   },
 }
 
-export const DESIGNER_STATIC_PATH = './public/designer-spa/3.9.346/index.min.js'
+export const DESIGNER_STATIC_PATH = './public/designer-spa/3.9.451/index.min.js'
 // export const DESIGNER_STATIC_PATH = 'https://f2.eckwai.com/kos/nlav12333/mybricks/designer-spa/3.9.137/index.min.js'

@@ -197,12 +197,14 @@ const Designer = ({ appData }) => {
   }, [designer])
 
   useLayoutEffect(() => {
+    let hasMaterial = false
     // 兼容逻辑
     const currentComlibs = appData.fileContent?.content?.comlibs?.filter((comlib) => {
       if (comlib.defined) {
         // 我的组件
         return true
       } else if (comlib.material_id) {
+        hasMaterial = true
         // 来自物料中心
         return true
       }
@@ -210,8 +212,12 @@ const Designer = ({ appData }) => {
       return false;
     })
 
+    if (currentComlibs?.length && !hasMaterial) {
+      currentComlibs.push(HARMONY_COM_LIB.editJs)
+    }
+
     appData.getInitComLibs({
-      localComlibs: [HARMONY_COM_LIB],
+      localComlibs: [HARMONY_COM_LIB.editJs],
       currentComlibs: currentComlibs?.length ? currentComlibs : null,
     }).then(({ comlibs, latestComlibs }) => {
       const newComlibs = comlibs
