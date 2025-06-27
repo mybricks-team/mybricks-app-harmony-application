@@ -230,7 +230,10 @@ export default function ({
             }) 
             break;
           case "getModule":
-            await myRequire([`/api/harmony-application/getModule?moduleId=${moduleId}&version=${moduleVersion}&origin=${location.origin}`], () => {})
+            await myRequire([`/api/harmony-application/getModule?moduleId=${moduleId}&version=${moduleVersion}&origin=${location.origin}`], (err) => {
+              console.error("[appConfig - moduleLoader]", desc, err)
+              resolve(null)
+            })
             resolve(window[`module_${moduleId}`])
             break;
           case "getPage":
