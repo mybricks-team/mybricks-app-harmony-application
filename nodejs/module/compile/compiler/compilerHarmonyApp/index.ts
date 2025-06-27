@@ -32,7 +32,7 @@ const compilerHarmonyApp = async (params, config) => {
   // est路径
   const targetEtsPath = path.join(targetAppPath, "entry/src/main/ets");
 
-  if (comlibs?.[0].hmCode) {
+  if (comlibs?.[0]?.hmCode) {
     // 配置组件库，使用远程组件库源码
     const comlibZipPath = path.join(targetAppPath, "comlib.zip");
     await downloadZip({
