@@ -1,6 +1,6 @@
 {
   "name": "mybricks-app-harmony-application",
-  "version": "0.0.24",
+  "version": "0.0.26",
   "description": "可视化、模块化搭建鸿蒙应用，可导出下载应用的ArkTS源码",
   "scripts": {
     "start:dev": "NODE_ENV=development node nodejs/index.ts",
@@ -42,7 +42,8 @@
     "nodemon": "^3.1.10",
     "pako": "^2.1.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "jszip": "^3.10.1"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
