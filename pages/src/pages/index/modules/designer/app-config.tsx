@@ -653,6 +653,7 @@ export default function ({
       type: "mobile",
       width: 375,
       height: 667,
+      toolbarContainer: '#sdk_toolbar_center',
       theme: {
         css: [
           "./public/brickd-mobile/0.0.53/index.css",
