@@ -128,7 +128,7 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
         {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyModule })}>下载源码(模块)</Toolbar.Button> */}
         <Tooltip
           placement="bottom"
-          title={"下载源码"}
+          title={"导出应用源代码"}
         >
         <div className={css.export_btn} onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>
           {Export}
