@@ -34,9 +34,11 @@ class DslJsonTraversal {
     const modifierBefore = this.modifiers.get('component:before');
     modifierBefore?.(component);
 
+    const namespace = component.namespace
+
     // 检查是否有对应的修改器
-    if (component.namespace && this.modifiers.has(component.namespace)) {
-      const modifier = this.modifiers.get(component.namespace);
+    if (namespace && this.modifiers.has(namespace)) {
+      const modifier = this.modifiers.get(namespace);
       // 执行修改
       modifier?.(component);
     }
@@ -52,6 +54,9 @@ class DslJsonTraversal {
     if (component.comAry) {
       component.comAry.forEach(com => this.traverseComponent(com));
     }
+
+    const modifierComponentAfter = this.modifiers.get(`${namespace}:after`);
+    modifierComponentAfter?.(component)
   }
 
   // 遍历slot节点
@@ -477,6 +482,13 @@ traversal.registerModifier('system.page', (component) => {
     delete component?.style?.styleAry
   }
   component.asRoot = true
+})
+
+// 添加对根结点的处理
+traversal.registerModifier('system.page:after', (component) => {
+  if (component?.slots?.content.style) {
+    component.slots.content.style.height = '100%'
+  }
 })
 
 /** 是否注册组件的modifiers */
