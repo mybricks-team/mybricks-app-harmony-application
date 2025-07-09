@@ -89,10 +89,14 @@ export const getDSLPrompts = () => {
   <组件使用建议>
   1. 基础布局必须使用flex组件，禁止使用容器(mybricks.harmony.containerBasic)；
   2. 文本、图片、图标、按钮组件属于基础组件，任何情况下都可以优先使用，即使不在允许使用的组件里；
-  3. 图标禁止使用emoji或者特殊符号，使用图标(mybricks.harmony.icon)组件来替代；
-  4. 尽可能使用margin替代padding，多注意组件是否需要配置margin；
-  5. 仔细是否需要用到绝对定位，是相对于父元素的；
-  6. system.page下方元素注意配置左右margin；
+  3. 关于图标，图标禁止使用emoji或者特殊符号，必须使用用图标(mybricks.harmony.icon)组件来搭建；
+  4. 关于图片，注意区分什么时候应该用图片，什么时候应该用图标；
+    4.1 如果是常规图片，使用https://ai.mybricks.world/image-search?term=dog&w=100&h=200，其中term代表搜索词，w和h可以配置图片宽高；
+    4.2 如果是Logo，可以使用https://placehold.co来配置一个带文本和颜色的图标，其中text需要为图标的英文搜索词，禁止使用emoji或者特殊符号；
+  5. 图标禁止使用emoji或者特殊符号，使用图标(mybricks.harmony.icon)组件来替代；
+  6. 注意margin和padding的结合使用，如果可以则建议用margin；
+  7. 仔细是否需要用到绝对定位，是相对于父元素的；
+  8. system.page下方元素注意配置左右margin，特殊情况比如导航栏这类通栏效果，和背景通栏效果不要配置margin；
   </组件使用建议>
 
   <组件特殊声明>
@@ -116,11 +120,11 @@ export const getDSLPrompts = () => {
 		</flex>
 	</flex>
   - 垂直布局，高度固定的情况下，可以通过justifyContent调整子组件布局
-   <flex column title="布局调整Demo" layout={{width: '100%', height: 100, justifyContent:'space-between'}}>
-    <flex column title="居上" layout={{width: 300，height: 30}}>
+   <flex column title="布局调整Demo" layout={{width: '100%', height: 100, justifyContent:'center'}}>
+    <flex column title="居中" layout={{width: 300，height: 30}}>
 			<A />
 		</flex>
-		<flex column title="居下" layout={{flex: 1, height: 20}}>
+		<flex column title="居中" layout={{flex: 1, height: 20}}>
 			<B />
 		</flex>
    </flex>

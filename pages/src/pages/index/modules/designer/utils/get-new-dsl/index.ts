@@ -233,15 +233,15 @@ traversal.registerModifier('flex', (component) => {
     })
   }
 
-  // 处理幻觉
-  if (component.style?.paddingLeft) {
-    component.style.marginLeft = component.style?.paddingLeft
-    delete component.style?.paddingLeft
-  }
-  if (component.style?.paddingRight) {
-    component.style.marginRight = component.style?.paddingRight
-    delete component.style?.paddingRight
-  }
+  // // 处理幻觉
+  // if (component.style?.paddingLeft) {
+  //   component.style.marginLeft = component.style?.paddingLeft
+  //   delete component.style?.paddingLeft
+  // }
+  // if (component.style?.paddingRight) {
+  //   component.style.marginRight = component.style?.paddingRight
+  //   delete component.style?.paddingRight
+  // }
 
   // 处理绝对定位兼容
   const rootStyle = component?.style?.styleAry?.find?.(s => s.selector === ':root')?.css

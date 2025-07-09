@@ -251,6 +251,9 @@ export default function ({
       return contentModel.getMetaContent();
     },
     // comLibAdder: appData.comLibAdder(ctx),
+    // comLibLoader: () => {
+    //   return Promise.resolve(['http://127.0.0.1:8000/libEdt.js'])
+    // },
     comLibLoader: appData.comLibLoader({
       comlibs: ctx.comlibs,
       cleanStyles: false,
