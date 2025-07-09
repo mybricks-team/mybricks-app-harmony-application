@@ -60,7 +60,7 @@
     "name": "mybricks-app-harmony-application",
     "extName": "harmony-application",
     "icon": "/mybricks-app-harmony-application/public/icon.svg",
-    "title": "鸿蒙应用",
+    "title": "鸿蒙应用「Beta版」",
     "setting": "setting.html"
   },
   "nodemonConfig": {
