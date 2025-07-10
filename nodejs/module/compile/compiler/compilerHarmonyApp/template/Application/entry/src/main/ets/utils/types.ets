@@ -48,6 +48,7 @@ export declare namespace MyBricks {
     data: Data
     inputs: string[]
     outputs: string[]
+    title?: string;
   }
 
   type JSReturn = (...values: MyBricks.EventValue[]) => Record<string, MyBricks.EventValue>

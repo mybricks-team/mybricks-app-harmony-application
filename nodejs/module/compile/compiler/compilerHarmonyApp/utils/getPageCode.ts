@@ -5,7 +5,7 @@ import { COMPONENT_PACKAGE_NAME } from "./constant"
 import { firstCharToUpperCase } from "./string"
 
 const getPageCode = async (params, modulesData, result = { }) => {
-  const { key, moduleName, data } = params;
+  const { key, moduleName, data, useLog } = params;
   const usedComponentsMap = {};
   const usedModuleIds = new Set();
   const pageCode = toHarmonyCode(data.toJson, {
@@ -72,7 +72,8 @@ const getPageCode = async (params, modulesData, result = { }) => {
       }
 
       return `${modulesData[key].moduleName}_${id}`;
-    }
+    },
+    verbose: useLog,
   });
 
   result[key] = {
@@ -88,7 +89,8 @@ const getPageCode = async (params, modulesData, result = { }) => {
       await getPageCode({
         key: moduleId,
         moduleName: module.moduleName,
-        data: module.data
+        data: module.data,
+        useLog,
       }, modulesData, result)
     }))
   }
