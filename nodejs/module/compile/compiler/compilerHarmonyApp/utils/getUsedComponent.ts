@@ -1,5 +1,5 @@
 const getUsedComponent = (params) => {
-  const { usedComponentsMap, componentMetaMap } = params
+  const { usedComponentsMap, componentMetaMap, verbose } = params
   let importComponentCode = "";
   let declaredComponentCode = "";
 
@@ -39,6 +39,7 @@ const getUsedComponent = (params) => {
       @ComponentV2
       export struct ${componentName} {
         @Param @Require uid: string;
+        ${verbose ? "@Param @Require title: string;" : ""}
         @Param controller: MyBricks.Controller = Controller();
         @Param @Require data: MyBricks.Data
         @Param events: MyBricks.Events = {}

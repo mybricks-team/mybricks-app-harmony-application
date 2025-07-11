@@ -13,14 +13,15 @@ import {
   handleEntryCode,
   handleGlobalCode,
   getModules,
-  downloadZip
+  downloadZip,
+  createUtilsMybricks
 } from "./utils";
 
 /** 组件、控制器等导出路径 */
 const PROXY_PACKAGE_NAME = "../_proxy/Index"
 
 const compilerHarmonyApp = async (params, config) => {
-  const { data, projectPath, projectName, fileName, depModules, origin, type, fileId, domainName } = params;
+  const { data, projectPath, projectName, fileName, depModules, origin, type, fileId, domainName, useLog = true } = params;
   const { Logger } = config;
   const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson, comlibs } = data;
 
@@ -31,6 +32,13 @@ const compilerHarmonyApp = async (params, config) => {
 
   // est路径
   const targetEtsPath = path.join(targetAppPath, "entry/src/main/ets");
+
+  // 写utils/mybricks.js
+  await fse.writeFile(
+    path.join(targetEtsPath, "utils/mybricks.js"),
+    createUtilsMybricks({ useLog }),
+    'utf-8'
+  )
 
   if (comlibs?.[0]?.hmCode) {
     // 配置组件库，使用远程组件库源码
@@ -69,7 +77,8 @@ const compilerHarmonyApp = async (params, config) => {
       pages,
       appConfig,
       tabBarJson
-    }
+    },
+    useLog
   }, modulesData)
 
   // fse.writeJson("tojson.json", pageCode, "utf-8") // 临时方便调试
@@ -160,7 +169,7 @@ const compilerHarmonyApp = async (params, config) => {
         { encoding: "utf8" })
     }
 
-    const { importComponentCode, declaredComponentCode } = getUsedComponent({ usedComponentsMap, componentMetaMap })
+    const { importComponentCode, declaredComponentCode } = getUsedComponent({ usedComponentsMap, componentMetaMap, verbose: useLog })
 
     fse.writeFileSync(
       path.join(targetEtsPath, `modules/${moduleName}/_proxy/Index.ets`),

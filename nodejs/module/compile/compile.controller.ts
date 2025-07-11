@@ -77,6 +77,7 @@ export default class CompileController {
     @Body("fileName") fileName: string,
     @Body("data") data: any,
     @Body("type") type: string,
+    @Body("useLog") useLog: boolean,
     @Req() req: any
   ) {
     try {
@@ -101,6 +102,7 @@ export default class CompileController {
           domainName: getRealDomain(req),
           type,
           fileId,
+          useLog
         },
         { Logger }
       );
