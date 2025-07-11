@@ -482,7 +482,7 @@ class Content {
       });
 
       this.originPagesJson = records;
-      console.log("加载小程序数据成功");
+      console.log("加载应用数据成功");
       loadLastStatus.success();
     } catch (error) {
       loadLastStatus.fail();

@@ -187,8 +187,8 @@ traversal.registerModifier('slot', (slot) => {
     ...slot.style,
     layout: slot.style?.flexDirection === 'row' ? 'flex-row' : 'flex-column',
     flexDirection: slot.style?.flexDirection === 'row' ? 'row' : 'column',
-    width: slot.style?.width ?? '100%',
-    height: slot.style?.height ?? 'fit-content'
+    width: slot.style?.width,
+    height: slot.style?.height
   }
 })
 
@@ -271,6 +271,26 @@ traversal.registerModifier('flex', (component) => {
     }
 
     delete rootStyle.position
+  }
+
+  // 兼容布局写到rootStyle的情况
+  if (rootStyle?.flexDirection) {
+    if (!component.style) {
+      component.style = {}
+    }
+    component.style.flexDirection = rootStyle.flexDirection
+  }
+  if (rootStyle?.alignItems) {
+    if (!component.style) {
+      component.style = {}
+    }
+    component.style.alignItems = rootStyle.alignItems
+  }
+  if (rootStyle?.justifyContent) {
+    if (!component.style) {
+      component.style = {}
+    }
+    component.style.justifyContent = rootStyle.justifyContent
   }
 
   // // 兼容一些样式加到了layout上的情况
