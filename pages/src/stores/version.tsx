@@ -3,6 +3,7 @@ import { notification } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 import dayjs from "dayjs";
 import { pageModel } from "./page";
+import updateTip from "./components/updateTip";
 
 const tipStyle = { color: "#FA6400" };
 
@@ -65,14 +66,11 @@ class Version {
 
         notification.open({
           key: this.compareNotificationKey,
-          message: '版本更新提示',
+          message: '',
+          style: { borderRadius: "8px", padding: "4px" },
           description: (
             <>
-              <div>当前最新保存版本号为 <b style={tipStyle}>{file.version}</b></div>
-              <div>由 <b style={tipStyle}>{file.updatorName || file.updatorId || file.creatorName || file.creatorId}</b> 保存</div>
-              <div>当前保存内容：</div>
-              <b style={tipStyle}>应用全局配置</b>
-              {description.length ? description.map((des) => des) : null}
+              {updateTip({ versions: file.version, updatorName: file.updatorName || file.updatorId || file.creatorName || file.creatorId, description, isglobalUpdate: true })}
             </>
           ),
           duration: null,
@@ -113,13 +111,11 @@ class Version {
 
         notification.open({
           key: this.compareNotificationKey,
-          message: '版本更新提示',
+          message: '',
+          style: { borderRadius: "8px", padding: "4px" },
           description: (
             <>
-              <div>当前最新保存版本号为 <b style={tipStyle}>{file.version}</b></div>
-              <div>由 <b style={tipStyle}>{file.updatorName || file.updatorId || file.creatorName || file.creatorId}</b> 保存</div>
-              <div>当前保存内容：</div>
-              {description.map((des) => des)}
+              {updateTip({ versions: file.version, updatorName: file.updatorName || file.updatorId || file.creatorName || file.creatorId, description, isglobalUpdate: false })}
             </>
           ),
           duration: null,

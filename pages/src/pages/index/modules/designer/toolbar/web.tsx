@@ -88,10 +88,10 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
               : null
           }
         />
-        <Tooltip
+        {/* <Tooltip
           placement="bottom"
           title={"查看教程文档"}
-        >
+        > */}
           <div
             className={css.help_btn}
             onClick={() => {
@@ -99,41 +99,36 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
                 "https://docs.mybricks.world/docs/miniprogram/basic/addComponent/"
               );
             }}
+            data-mybricks-tip={`{content:'查看教程文档',position:'bottom'}`}
           >
             <img
               src={help}
               alt=""
             />
           </div>
-        </Tooltip>
+        {/* </Tooltip> */}
 
         {pageModel.isNew &&
           window.__type__ === "mpa" &&
           (globalOperable || operable) ? (
-          <Tooltip
-            placement="bottom"
-            title={
-              globalOperable
-                ? "当前保存包含应用内容以及上锁画布"
-                : "当前保存仅包含上锁画布"
-            }
-          >
             <ExclamationCircleOutlined
               style={{ color: isModify ? "#FA6400" : "inherit", opacity: 0.5 }}
+              data-mybricks-tip={`{content:'${globalOperable
+                ? "当前保存包含应用内容以及上锁画布"
+                : "当前保存仅包含上锁画布"}',position:'bottom'}`}
             />
-          </Tooltip>
         ) : null}
         <Toolbar.Save disabled={!operable} onClick={onSave} dotTip={isModify} />
         {/* <Toolbar.Button disabled={!operable} onClick={publishHandle}>发布</Toolbar.Button> */}
         {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyModule })}>下载源码(模块)</Toolbar.Button> */}
-        <Tooltip
+        {/* <Tooltip
           placement="bottom"
           title={"导出应用源代码"}
-        >
-        <div className={css.export_btn} onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>
+        > */}
+        <div className={css.export_btn} onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })} data-mybricks-tip={`{content:'导出应用源代码',position:'left'}`}>
           {Export}
         </div>
-        </Tooltip>
+        {/* </Tooltip> */}
         {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>导出应用源码</Toolbar.Button> */}
       </Toolbar>
     </>
