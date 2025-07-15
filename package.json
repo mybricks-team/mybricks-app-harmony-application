@@ -1,6 +1,6 @@
 {
   "name": "mybricks-app-harmony-application",
-  "version": "0.0.31",
+  "version": "0.0.33",
   "description": "可视化、模块化搭建鸿蒙应用，可导出下载应用的ArkTS源码",
   "scripts": {
     "start:dev": "NODE_ENV=development node nodejs/index.ts",
@@ -29,8 +29,8 @@
   "dependencies": {
     "@mybricks/color-picker": "^1.0.9",
     "@mybricks/rocker-commons": "^0.0.2",
-    "@mybricks/sdk-for-app": "^1.0.65",
-    "@mybricks/to-code-react": "^0.0.5-next.68",
+    "@mybricks/sdk-for-app": "^1.0.69",
+    "@mybricks/to-code-react": "^0.0.5-next.69",
     "@nestjs/common": "^8.0.0",
     "@nestjs/core": "^8.0.0",
     "@nestjs/platform-express": "^8.0.0",
