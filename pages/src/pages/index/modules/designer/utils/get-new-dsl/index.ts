@@ -210,7 +210,27 @@ traversal.registerModifier('flex', (component) => {
 
   // 兼容把样式写到 layout 的情况
   if (component.style) {
-    const { width, height, justifyContent, alignItems, flex, styleAry, ...extra } = component.style
+    const {
+      width,
+      height,
+      justifyContent,
+      alignItems,
+      flex,
+      flexDirection,
+      columnGap,
+      styleAry,
+      margin,
+      marginTop,
+      marginBottom,
+      marginLeft,
+      marginRight,
+      position,
+      left,
+      right,
+      top,
+      bottom,
+      ...extra
+    } = component.style
 
     if (!component?.style?.styleAry) {
       component.style.styleAry = [
@@ -224,6 +244,12 @@ traversal.registerModifier('flex', (component) => {
       ...(component.style.styleAry[0]?.css ?? {}),
       ...(extra ?? {})
     }
+    // 清理多余的属性，特别是padding容易导致双重padding
+    Object.keys(extra ?? {}).forEach((key) => {
+      if (key.includes('padding')) {
+        delete component.style[key]
+      }
+    })
   }
 
   if (component?.style?.styleAry) {
