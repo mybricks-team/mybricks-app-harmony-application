@@ -231,6 +231,8 @@ const getModule = async (params) => {
     })
   })
 
+  const httpPlugin = toJson.plugins['@mybricks/plugins/service'];
+
   const baseToJson = {
     ...toJson,
     scenes: [],
@@ -238,6 +240,26 @@ const getModule = async (params) => {
   }
   let comArayCode = "";
   toJson.scenes.forEach((scene) => {
+    if (Array.isArray(httpPlugin?.connectors)) {
+    Object.entries(scene.coms).forEach(([_, com]: any) => {
+      if (com.def.namespace === "mybricks.harmony._connector") {
+        const comConnector = com.model.data.connector;
+        const httpConnector = httpPlugin.connectors.find((connector) => connector.id === comConnector.id);
+
+        if (httpConnector) {
+          com.model.data.connector = {
+            ...com.model.data.connector,
+            ...httpConnector,
+            content: {
+              globalParamsFn: httpPlugin.config.paramsFn,
+              globalResultFn: httpPlugin.config.resultFn,
+              globalErrorResultFn: httpPlugin.config.errorResultFn,
+            }
+          }
+        }
+      }
+    })
+  }
     if (scene.type === "module") {
       comArayCode += `${calculateUiComponent({tojson: scene, version, origin, module, sectionsMap})},`
     }

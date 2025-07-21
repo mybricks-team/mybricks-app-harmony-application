@@ -12,6 +12,29 @@ const loadPage = async (params) => {
     moduleVersion: harmonyModule.version
   }
 
+  const httpPlugin = publishContent.content.data.toJson.plugins['@mybricks/plugins/service'];
+
+  if (Array.isArray(httpPlugin?.connectors)) {
+    Object.entries(json.coms).forEach(([_, com]: any) => {
+      if (com.def.namespace === "mybricks.harmony._connector") {
+        const comConnector = com.model.data.connector;
+        const httpConnector = httpPlugin.connectors.find((connector) => connector.id === comConnector.id);
+
+        if (httpConnector) {
+          com.model.data.connector = {
+            ...com.model.data.connector,
+            ...httpConnector,
+            content: {
+              globalParamsFn: httpPlugin.config.paramsFn,
+              globalResultFn: httpPlugin.config.resultFn,
+              globalErrorResultFn: httpPlugin.config.errorResultFn,
+            }
+          }
+        }
+      }
+    })
+  }
+
   return json;
 }
 
