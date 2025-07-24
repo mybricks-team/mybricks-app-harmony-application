@@ -1,0 +1,108 @@
+.panel {
+  width: 376px;
+  background: rgb(255, 255, 255);
+  color: rgb(102, 102, 102);
+  position: fixed;
+  right: 15px;
+  top: 40px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 2px 10px 0px;
+  overflow: hidden;
+  z-index: 1049;
+
+  .title {
+    padding: 12px 15px;
+    color: rgba(0, 0, 0, .85);
+    font-weight: 500;
+    font-size: 14px;
+    border-bottom: 1px solid rgb(247, 247, 247);
+  }
+}
+
+.require {
+  padding: 12px 15px;
+  :global {
+    .ant-form-item {
+      margin-bottom: 12px;
+    }
+    .ant-form-item-row {
+      flex-direction: column;
+    }
+    .ant-form-item-label {
+      line-height: 1!important;
+      padding: 0!important;
+    }
+    .ant-form-item-label > label {
+      font-size: 12px;
+      height: fit-content!important;
+      margin-bottom: 6px!important;
+    }
+    .ant-input {
+      font-size: 12px;
+      line-height: 2;
+    }
+    .ant-btn-sm {
+      font-size: 12px;
+      padding: 0px 12px;
+    }
+    .ant-btn-primary {
+      border-color: #FA6400;
+      background: #FA6400;
+    }
+  }
+  .footer {
+    padding-top: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+
+    .button {
+      outline: 0;
+      border: 1px solid rgba(0, 0, 0, 0.10196);
+      letter-spacing: 0;
+      padding: 3px 13px;
+      margin: 0 5px;
+      font-size: 12px;
+      line-height: 12px;
+      height: 24px;
+      position: relative;
+      background-color: #fff;
+      border-radius: 6px;
+      color: rgba(0, 0, 0, 0.9);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+
+    .mainButton {
+      background: var(--mybricks-color-primary);
+      border: var(--mybricks-color-primary) solid 1px;
+      color: #FFF;
+      font-weight: bold;
+      transition: transform 0.3s ease;
+    }
+  }
+
+  .help{
+    background-color: #fffbe6;
+    border: 1px solid #ffe58f;
+    font-size: 12px;
+    color: #838383;
+    border-radius: 4px;
+    padding: 7px;
+    
+    .tips{
+      color: #5c5c5c;
+      font-weight: 500;
+    }
+
+    .listItem {
+      margin-top: 5px;
+    }
+  }
+}

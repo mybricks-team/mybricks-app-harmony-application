@@ -45,3 +45,5 @@ export function getPageTitlePrefix () {
 }
 
 export * from "./download";
+export * from "./pinyin";
+export * from "./string";

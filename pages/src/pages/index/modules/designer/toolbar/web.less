@@ -10,6 +10,27 @@
   margin-right: 5px;
   transition: background-color 0.3s ease;
 
+  &:not(.active_btn):hover{
+    background-color: #eeeeee;
+  }
+}
+
+.active_btn {
+  background-color: rgb(229, 229, 229);
+}
+
+.publish_btn{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+  margin-left: 7px !important;
+  margin-right: 5px;
+  transition: background-color 0.3s ease;
+
   &:hover{
     background-color: #eeeeee;
   }
@@ -28,7 +49,7 @@
 //   background-color: #fff;
   user-select: none;
   line-height: 1;
-  margin-right: 3px !important;
+  margin-right: 0px !important;
   margin-left: 3px !important;
   display: flex;
   align-items: center;

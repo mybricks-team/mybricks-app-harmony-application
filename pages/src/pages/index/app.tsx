@@ -12,6 +12,15 @@ import { CompileType } from '@/types'
 import MyDesigner from "./modules/designer";
 import logger from "@/utils/logger";
 import "./app.less";
+import { pinyin, cleanAndSplitString, firstCharToUpperCase, firstCharToLowerCase } from "@/utils"
+
+const transformString = (text: string) => {
+  const splits = cleanAndSplitString(text);
+  
+  return splits.reduce((pre, cur) => {
+    return pre + firstCharToUpperCase(pinyin.convertToPinyin(cur, "", true))
+  }, "")
+}
 
 function mpa() {
   // 弹出提示，二次确认是否切换到 MPA 模式
@@ -117,6 +126,12 @@ const Application = () => {
     pageModel.projectId = data.projectId;
 
     pageModel.appConfig = data.fileContent.content?.appConfig || {};
+    if (!pageModel.appConfig.download) {
+      pageModel.appConfig.download = {
+        fileName: firstCharToLowerCase(transformString(pageModel.file.name || "module")),
+        source: "ohpmLibrary"
+      }
+    }
     pageModel.wxConfig = data.fileContent.content?.wxConfig || {};
     pageModel.debug = data.fileContent.content?.debug || {};
 

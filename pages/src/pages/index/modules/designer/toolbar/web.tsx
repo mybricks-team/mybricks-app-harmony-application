@@ -1,14 +1,14 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useComputed } from "rxui-t";
 import { Locker, Toolbar } from "@mybricks/sdk-for-app/ui";
-import { pageModel, versionModel } from "@/stores";
-import { message, Tooltip } from "antd";
+import { pageModel, versionModel, contentModel } from "@/stores";
+import { message } from "antd";
 import { ExclamationCircleOutlined } from "@ant-design/icons";
 import css from "./web.less";
 import help from "./icons/help"
-import { showHarmonyDownloadConfig } from "./model/downloadModel"
-import { CompileType } from "@/types";
 import { Export } from "./icons/export";
+import { publish } from "./icons/publish";
+import { ExportPanel } from "./components";
 
 interface WebToolbarProps {
   operable: boolean;
@@ -22,6 +22,7 @@ interface WebToolbarProps {
   onPublish: () => void;
   onH5Publish?: any;
   onH5Preview?: any;
+  setBeforeunload: (bool: boolean) => void
 }
 
 export const WebToolbar: React.FC<WebToolbarProps> = ({
@@ -33,7 +34,10 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
   onSave,
   onCompile,
   onPublish,
+  setBeforeunload,
 }) => {
+  const [showExportPanel, setShowExportPanel] = useState(false);
+
   const handleSwitch2SaveVersion = useCallback(() => {
     designerRef.current?.switchActivity?.("@mybricks/plugins/version");
     setTimeout(() => {
@@ -58,11 +62,24 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
   }, [publishLoading]);
 
   const publishHandle = () => {
-    if (!globalOperable) {
-      return;
-    }
+    // if (!globalOperable) {
+    //   return;
+    // }
     onPublish()
   };
+
+  // const closeExportPanel = useCallback((e) => {
+  //   setShowExportPanel(false);
+  // }, [])
+
+  // useEffect(() => {
+
+  //   if (showExportPanel) {
+  //     window.addEventListener('click', closeExportPanel, true);
+  //   } else {
+  //     window.removeEventListener('click', closeExportPanel, true);
+  //   }
+  // }, [showExportPanel])
 
   return (
     <>
@@ -111,26 +128,75 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
         {pageModel.isNew &&
           window.__type__ === "mpa" &&
           (globalOperable || operable) ? (
+          // <Tooltip
+          //   placement="bottom"
+          //   title={
+          //     globalOperable
+          //       ? "当前保存包含应用内容以及上锁画布"
+          //       : "当前保存仅包含上锁画布"
+          //   }
+          // >
             <ExclamationCircleOutlined
               style={{ color: isModify ? "#FA6400" : "inherit", opacity: 0.5 }}
               data-mybricks-tip={`{content:'${globalOperable
                 ? "当前保存包含应用内容以及上锁画布"
                 : "当前保存仅包含上锁画布"}',position:'bottom'}`}
             />
+          // </Tooltip>
         ) : null}
         <Toolbar.Save disabled={!operable} onClick={onSave} dotTip={isModify} />
+
+
         {/* <Toolbar.Button disabled={!operable} onClick={publishHandle}>发布</Toolbar.Button> */}
-        {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyModule })}>下载源码(模块)</Toolbar.Button> */}
         {/* <Tooltip
+          style={{
+              borderRadius:12
+          }
+          }
           placement="bottom"
-          title={"导出应用源代码"}
+          title={"发布到物料中心"}
         > */}
-        <div className={css.export_btn} onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })} data-mybricks-tip={`{content:'导出应用源代码',position:'left'}`}>
-          {Export}
-        </div>
+          <div className={css.publish_btn} onClick={publishHandle} data-mybricks-tip={`{content:'发布到物料中心',position:'bottom'}`}>
+            {publish}
+          </div>
         {/* </Tooltip> */}
-        {/* <Toolbar.Button onClick={() => showHarmonyDownloadConfig({ onCompile, type: CompileType.harmonyApplication })}>导出应用源码</Toolbar.Button> */}
+
+        {/* <Tooltip
+          placement="bottomLeft"
+          title={"导出模块源码"}
+        > */}
+          <div
+            className={`${css.export_btn} ${showExportPanel ? css.active_btn : ""}`}
+            onClick={() => setShowExportPanel(true)}
+            data-mybricks-tip={`{content:'导出模块源码',position:'left'}`}
+          >
+            {Export}
+          </div>
+        {/* </Tooltip> */}
       </Toolbar>
+      <ExportPanel
+        visible={showExportPanel}
+        onOk={(values) => {
+          let isEdited = false
+          if (pageModel.appConfig.download.fileName !== values.fileName) {
+            pageModel.appConfig.download.fileName = values.fileName;
+            isEdited = true;
+          }
+          if (pageModel.appConfig.download.source !== values.source) {
+            pageModel.appConfig.download.source = values.source;
+            isEdited = true;
+          }
+          onCompile(values);
+          setShowExportPanel(false);
+          if (isEdited) {
+            contentModel.editRecord.global = true;
+            setBeforeunload(true);
+          }
+        }}
+        onCancel={() => {
+          setShowExportPanel(false);
+        }}
+      />
     </>
   );
 };

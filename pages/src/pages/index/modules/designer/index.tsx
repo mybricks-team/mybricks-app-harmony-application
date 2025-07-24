@@ -264,43 +264,41 @@ const Designer = ({ appData }) => {
     }
   }, [beforeunload]);
 
-  const download = useCallback(({ type, backEndProjectPath, localize = 0 }) => {
-    // const loadingKey = 'donwload'
-    // message.loading({
-    //   content: '下载中...',
-    //   key: loadingKey,
-    // })
+  const download = useCallback(({ type, filename = undefined, backEndProjectPath, localize = 0 }) => {
+    return new Promise((resolve, reject) => {
+      axios.get(`/api/harmony-application/download?fileId=${pageModel.fileId}&type=${type}&localize=${localize}`, {
+        responseType: 'blob'
+      })
+        .then(response => {
+          const url = window.URL.createObjectURL(response.data);
+          const a = document.createElement('a');
+          a.style = "display: none"; 
+          a.href = url;
+          a.download = filename || `${pageModel.fileId}-${type}.zip`;
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          window.URL.revokeObjectURL(url);
+          resolve(true)
+        })
+        .catch(error => {
+          console.error('导出失败:', error);
+          reject();
+        });
+    })
 
-    const urls = [
-      {
-        url: `/api/harmony-application/download?fileId=${pageModel.fileId}&type=${type}&localize=${localize}`,
-        filename: `${pageModel.fileId}-${type}.zip`,
-      },
-      // {
-      //   url: `/paas/api/project/download?fileId=${pageModel.fileId}&target=prod`,
-      //   filename: `node-app-${pageModel.fileId}-prod.zip`,
-      // },
-    ];
+    // const urls = [
+    //   {
+    //     url: `/api/harmony-module/download?fileId=${pageModel.fileId}&type=${type}&localize=${localize}`,
+    //     filename: filename || `${pageModel.fileId}-${type}.zip`,
+    //   },
+    // ];
 
-    urls.forEach((item) => {
-      let a = document.createElement("a");
-      a.style = "display: none"; // 创建一个隐藏的a标签
-      a.download = item.filename;
-      a.href = item.url;
-      document.body.appendChild(a);
-      a.click(); // 触发a标签的click事件
-      a.onload = () => {};
-      a.onerror = (err) => {
-        console.error(err);
-      };
-      document.body.removeChild(a);
-    });
-
-    // (() => {
+    // urls.forEach((item) => {
     //   let a = document.createElement("a");
     //   a.style = "display: none"; // 创建一个隐藏的a标签
-    //   a.download = filename;
-    //   a.href = `/api/harmony-application/download?fileId=${pageModel.fileId}&type=${type}&localize=${localize}`;
+    //   a.download = item.filename;
+    //   a.href = item.url;
     //   document.body.appendChild(a);
     //   a.click(); // 触发a标签的click事件
     //   a.onload = () => {};
@@ -308,13 +306,7 @@ const Designer = ({ appData }) => {
     //     console.error(err);
     //   };
     //   document.body.removeChild(a);
-    // })()
-    //   .catch((err) => {
-    //     message.error(err?.message ?? "下载失败");
-    //   })
-    //   .finally(() => {
-    //     // message.destroy(loadingKey)
-    //   });
+    // });
   }, []);
 
   const showPublishLoading = useCallback(async () => {
@@ -1154,24 +1146,49 @@ const Designer = ({ appData }) => {
     });
   }, []);
 
-  const onCompile = useCallback(
-    async ({
-      type = CompileType.weapp,
-      version = "1.0.0",
-      description = "版本说明",
-    }: {
-      type: CompileType;
-      version: string;
-      description: string;
-    }) => {
-      if (pageModel?.publishLoading) {
-        return;
-      }
-      await showPublishLoading();
+   const onCompile = useCallback(
+    async (params) => {
+      const close = message.loading({
+        key: 'download',
+        content: '导出中...',
+        duration: 0,
+      })
+
+      await sleep(300);
+
+      const type = "harmonyApplication"
 
       try {
-        const isHarmony = [CompileType.harmonyModule, CompileType.harmonyApplication].includes(type)
-        const toJson = await contentModel.toJSON(isHarmony ? { withDiagrams: true } : null);
+        const toJson = await contentModel.toJSON({
+          withDiagrams: true,
+          getNewJSON(json) {
+            json.scenes.forEach((scene) => {
+              if (scene.type) {
+                return
+              }
+              const { slot, coms } = scene;
+              const { comAry } = slot;
+              if (comAry?.[0]?.def.namespace !== "mybricks.harmony.systemPage") {
+                return
+              }
+              const systemPageComAry = []
+              const fixedComAry = []
+              comAry[0].slots?.content?.comAry?.forEach((com) => {
+                const comInfo = coms[com.id]
+                if (comInfo.model.style.position === "fixed") {
+                  fixedComAry.push(com)
+                } else {
+                  systemPageComAry.push(com)
+                }
+              })
+              if (fixedComAry.length) {
+                slot.comAry.push(...fixedComAry)
+                comAry[0].slots.content.comAry = systemPageComAry
+              }
+            })
+            return json
+          }
+        });
 
         let comlibs = [...ctx.comlibs];
         if (window.__DEBUG_COMLIB__) {
@@ -1189,44 +1206,16 @@ const Designer = ({ appData }) => {
           }
         }
 
-        let json: any
-
-        if (isHarmony) {
-          json = await getHarmonyJson({
-            toJson: {
-              ...toJson,
-            },
-            comlibs: comlibs,
-            appConfig: {
-              defaultCallServiceHost:  pageModel.appConfig?.defaultCallServiceHost,
-            }
-          })
-        } else {
-          json = await getMiniappJson({
-            toJson: {
-              ...toJson,
-              tabbar: window.__tabbar__.get(),
-            },
-            ci: {
-              appid: pageModel.wxConfig.appid,
-              privateKey: decodeURIComponent(pageModel.wxConfig.privateKey || ""),
-              type: "miniProgram",
-              version,
-              desc: description,
-            },
-            status: {
-              projectId: pageModel.sdk.projectId,
-              fileId: pageModel.fileId,
-              apiEnv: "prod",
-              ...pageModel.appConfig,
-              appid: pageModel.wxConfig.appid,
-              appsecret: pageModel.wxConfig.appsecret,
-            },
-            comlibs: comlibs,
-          })
-        }
-
-        const url = isHarmony ? "/api/harmony-application/harmony/compile" : "/api/harmony-application/miniapp/compile"
+        const json = await getHarmonyJson({
+          toJson: {
+            ...toJson,
+          },
+          comlibs: comlibs,
+          appConfig: {
+            defaultCallServiceHost:  pageModel.appConfig?.defaultCallServiceHost,
+          },
+          download: params,
+        })
 
         const getComponentMetaMap = () => {
           const componentMetaMap = {};
@@ -1253,7 +1242,7 @@ const Designer = ({ appData }) => {
         }
 
         const res = await axios({
-          url,
+          url: "/api/harmony-application/harmony/compile",
           method: "POST",
           data: {
             userId: userModel.user?.id,
@@ -1268,55 +1257,53 @@ const Designer = ({ appData }) => {
               services: toJson.services,
               serviceFxUrl: pageModel.appConfig.serviceFxUrl,
               database: pageModel.appConfig.datasource,
-              toJson: isHarmony ? toJson : undefined,
+              toJson,
               componentMetaMap: getComponentMetaMap(),
-              installedModules: designerRef.current.getInstalledModules()
+              installedModules: designerRef.current.getInstalledModules(),
+              download: params,
+              basic: {
+                name: pageModel.file.name,
+                version: versionModel.file.version,
+                link: location.href,
+                author: pageModel.file.creatorName,
+                updateTime: dayjs(pageModel.file.updateTime || pageModel.file._updateTime || pageModel.file.createTime || pageModel.file._createTime).format("YYYY-MM-DD HH:mm:ss"),
+                updater: pageModel.file.updatorName || pageModel.file.creatorName
+              }
             },
           },
           withCredentials: false,
         });
         let data = res.data;
         pageModel.publishLoading = false;
+        
         if (data.code !== 1) {
-          handlePublishErrCode(data);
-
           if (data.innerMessage) {
             message.error(data.innerMessage);
+          } else {
+            message.error("导出失败")
+            console.error("导出失败:", data);
           }
+          close()
           return;
         }
-        // if (supportFSAccess && false) {
-        //   // 临时关闭 fs access API 的下载，文件多了后太慢了
-
-        //   // 支持 fs acess API 的浏览器走直接下载
-        //   message.loading({
-        //     key: "compile",
-        //     content: "正在构建到本地文件夹",
-        //   });
-        //   await downloadProjectToLocal({ type });
-        //   message.success({
-        //     key: "compile",
-        //     content: "已构建至本地文件夹",
-        //   });
-        // } else {
         download({
           type,
           backEndProjectPath: data?.data?.backEndProjectPath,
+          filename: `${params.fileName}.zip`,
         })
-          // showCompileSuccess({
-          //   type,
-          //   onDownload: () =>
-          //     download({
-          //       type,
-          //       backEndProjectPath: data?.data?.backEndProjectPath,
-          //     }),
-          // });
-        // }
+          .then(() => {
+            message.success("导出完成")
+          })
+          .catch(() => {
+            message.error("导出失败")
+          })
+          .finally(() => {
+            close()
+          })
       } catch (e) {
-        pageModel.publishLoading = false;
-        console.error(e);
-        message.error(e?.message ?? "构建小程序失败，请重试");
-        console.error(e?.message ?? "构建小程序失败，请重试");
+        message.error("导出失败")
+        console.error("导出失败:", e);
+        close();
       }
     },
     []
@@ -1489,6 +1476,7 @@ const Designer = ({ appData }) => {
         onH5Preview={onH5Preview}
         onAlipayPreview={onAlipayPreview}
         designerRef={designerRef}
+        setBeforeunload={setBeforeunload}
       />
       <div className={styles.designer}>
         {SPADesigner && latestComlibs && window?.mybricks?.createObservable && (

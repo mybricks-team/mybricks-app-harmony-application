@@ -13,6 +13,10 @@ interface PageInfo {
 	// navigationStyle 为 default 的时候的配置
 	navigationBarTitleText: string;
 
+  download: {
+    fileName: string;
+    source: "ohpmLibrary" | "sourceCode";
+  }
 }
 
 interface WxPreview {
