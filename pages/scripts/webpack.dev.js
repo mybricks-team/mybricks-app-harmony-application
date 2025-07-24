@@ -7,6 +7,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 const rootPath = path.resolve(__dirname, "./../../");
 
+const { PLATFORM } = process.env;
+
 module.exports = merge(common, {
   mode: "development",
   devtool: "inline-source-map",
@@ -46,20 +48,12 @@ module.exports = merge(common, {
         secure: false,
         changeOrigin: true,
       },
-      // {
-      //   context: ['/mybricks-app-harmony-application/api'],
-      //   pathRewrite: { '^/mybricks-app-harmony-application/api': '/api' },
-      //   target: 'http://localhost:3000',
-      //   secure: false,
-      //   changeOrigin: true,
-      // },
       {
         context: [
           '/paas/api/project/service/push',
           '/paas/api/project/download',
         ],
-        target: 'https://my.mybricks.world',
-        // target: 'http://127.0.0.1:3100',
+        target: PLATFORM,
         secure: false,
         changeOrigin: true,
       },
@@ -70,34 +64,16 @@ module.exports = merge(common, {
         pathRewrite: {
           '^/runtime/service': '/service', // 重写路径
         },
-        // target: 'http://127.0.0.1:3106',
-        target: 'https://my.mybricks.world',
+        target: PLATFORM,
         secure: false,
         changeOrigin: true,
       },
       {
         context: ["/"],
-        // target: 'https://admin.alialumni.com',
-        // target: 'http://118.31.0.78',
-        target: "https://my.mybricks.world",
-        // target:"https://build.zidayun.com",
-        // target: "https://test.mybricks.world",
-        // target: "http://work.manateeai.com",
-        // target: 'https://www.hzao.com.cn',
-        // target: 'http://127.0.0.1:3100',
+        target: PLATFORM,
         secure: false,
         changeOrigin: true
       },
-      // {
-      //   context: [
-      //     '/paas/api/serviceProject/push',
-      //     '/paas/api/serviceProject/download'
-      //   ],
-      //   // target: 'https://admin.alialumni.com',
-      //   target: 'http://127.0.0.1:3100',
-      //   secure: false,
-      //   changeOrigin: true,
-      // },
     ],
   },
   plugins: [

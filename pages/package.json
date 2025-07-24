@@ -5,7 +5,8 @@
   "main": "dist/main.js",
   "private": true,
   "scripts": {
-    "dev": "webpack serve --config ./scripts/webpack.dev.js",
+    "dev": "PLATFORM=https://my.mybricks.world webpack serve --config ./scripts/webpack.dev.js",
+    "dev:test": "PLATFORM=https://test.mybricks.world webpack serve --config ./scripts/webpack.dev.js",
     "build": "webpack --config ./scripts/webpack.prod.js",
     "build:offline": "npm install && webpack --config ./scripts/webpack.offline.js"
   },
