@@ -5,10 +5,12 @@ import { COMPONENT_PACKAGE_NAME } from "./constant"
 import { firstCharToUpperCase } from "./string"
 
 const getPageCode = async (params, modulesData, result = { }) => {
-  const { key, moduleName, data, useLog } = params;
+  const { key, moduleName, data, useLog, download } = params;
+  const { toJson } = data;
+  const verbose = useLog;
   const usedComponentsMap = {};
   const usedModuleIds = new Set();
-  const pageCode = toHarmonyCode(data.toJson, {
+  const pageCode = toHarmonyCode(toJson, {
     getComponentMetaByNamespace(namespace, config) {
       if (namespace.startsWith("mybricks.harmony.module")) {
         const { moduleId, pageId } = getModuleInfoByNamespace(namespace);
@@ -21,8 +23,8 @@ const getPageCode = async (params, modulesData, result = { }) => {
           return {
             dependencyImport: {
               packageName: `../../${moduleName}/api`,
-              dependencyNames: [componentName],
-              importType: "default",
+              dependencyNames: [`api as ${componentName}`],
+              importType: "named",
             },
             componentName,
           }
@@ -53,18 +55,24 @@ const getPageCode = async (params, modulesData, result = { }) => {
       }
 
       dependencyNames.push(componentName);
-  
+
       return {
         dependencyImport: {
-          packageName: COMPONENT_PACKAGE_NAME,
+          packageName: download.source === "sourceCode" ? (config.source === "extensionEvent" ? "./components/Index" : COMPONENT_PACKAGE_NAME) : "@mybricks/comlib-harmony-normal",
           dependencyNames,
           importType: "named",
         },
         componentName: componentName,
       };
     },
-    getComponentPackageName() {
-      return COMPONENT_PACKAGE_NAME
+    getComponentPackageName(params) {
+      if (params?.type === "extensionEvent") {
+        return download.source === "sourceCode" ? "./components/Index" : "./components"
+      }
+      return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "../components"
+    },
+    getUtilsPackageName() {
+      return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "@mybricks/render-utils"
     },
     getPageId(id) {
       if (key === "app") {
@@ -73,7 +81,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
 
       return `${modulesData[key].moduleName}_${id}`;
     },
-    verbose: useLog,
+    verbose,
   });
 
   result[key] = {
@@ -90,6 +98,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
         key: moduleId,
         moduleName: module.moduleName,
         data: module.data,
+        download,
         useLog,
       }, modulesData, result)
     }))

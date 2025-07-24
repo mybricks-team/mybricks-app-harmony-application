@@ -1,4 +1,4 @@
-import { appRouter } from "../utils"
+import { appRouter } from "../../../utils";
 import generateCode from "./codes";
 import {
   MyBricks,

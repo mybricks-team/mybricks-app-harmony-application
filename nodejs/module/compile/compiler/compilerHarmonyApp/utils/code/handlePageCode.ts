@@ -1,23 +1,29 @@
-import { COMPONENT_PACKAGE_NAME } from "../constant"
+import { COMPONENT_PACKAGE_NAME, RENDER_UTILS_PACKAGE_NAME } from "../constant"
 
 const handlePageCode = (page, {
-  disableScroll = false,
-  statusBarStyle,
-  navigationBarStyle,
-  navigationBarTitleText,
-  navigationStyle = 'default',
-  showBackIcon = false
+  pageConfig: {
+    disableScroll = false,
+    statusBarStyle,
+    navigationBarStyle,
+    navigationBarTitleText,
+    navigationStyle = 'default',
+    showBackIcon = false
+  },
+  params
 }) => {
+  const { data } = params;
+  const { download } = data;
+
   if (page.content.includes("MyBricks.")) {
     page.importManager.addImport({
-      packageName: "../../../utils/types",
+      packageName: download.source === "sourceCode" ? "../../../utils/types" : RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["MyBricks"],
       importType: "named",
     });
   }
   if (page.content.includes("controller:")) {
     page.importManager.addImport({
-      packageName: COMPONENT_PACKAGE_NAME,
+      packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["Controller", "ModuleController"],
       importType: "named",
     });

@@ -15,40 +15,162 @@ import {
   AdmZip
 } from "./utils";
 
+const copyOhPackage = async (params, config) => {
+  const { data } = params;
+  const { download } = data;
+  const { targetPath } = config;
+
+  const ohPackagePath = path.join(targetPath, "../../../oh-package.json5");
+
+  const ohPackage = await fse.readFile(ohPackagePath, 'utf-8')
+
+  await fse.writeFile(
+    ohPackagePath, 
+    ohPackage.replace(
+      "$r('app.oh.package.dependencies')", 
+      download.source === "ohpmLibrary" ? (
+        ",\n" + 
+        '    "@mybricks/render-utils": "latest",\n' +
+        '    "@mybricks/comlib-harmony-normal": "latest"'
+      ) : ""
+    ))
+}
+
+const copyUtils = async (params, config) => {
+  const { data } = params;
+  const { download } = data;
+  const { targetPath } = config;
+
+  if (download.source !== "ohpmLibrary") {
+    // 拷贝utils
+    await fse.copy(path.join(__dirname, "./template/utils"), path.join(targetPath, "utils"), { overwrite: true })
+    // 写utils/mybricks.js
+    // await fse.writeFile(
+    //   path.join(targetPath, "utils/mybricks.js"),
+    //   createUtilsMybricks({ useLog }),
+    //   'utf-8'
+    // )
+  } else {
+    await fse.copy(path.join(__dirname, "./template/utils/AppRouter.ets"), path.join(targetPath, "utils/AppRouter.ets"), { overwrite: true })
+    await fse.copy(path.join(__dirname, "./template/utils/AppWindow.ets"), path.join(targetPath, "utils/AppWindow.ets"), { overwrite: true })
+    await fse.copy(path.join(__dirname, "./template/utils/index.ets"), path.join(targetPath, "utils/index.ets"), { overwrite: true })
+  }
+}
+
+const copyComlib = async (params, config) => {
+  const { data, domainName } = params;
+  const { download } = data;
+  const { targetPath } = config;
+
+  if (download.source !== "ohpmLibrary") {
+    // 拷贝comlib
+    if (data.comlibs?.[0]?.hmCode) {
+      // 配置组件库，使用远程组件库源码
+      const comlibZipPath = path.join(targetPath, "comlib.zip");
+      await downloadZip({
+        url: `${domainName}${data.comlibs?.[0].hmCode}`,
+        targetPath: comlibZipPath
+      })
+      const zip = new AdmZip(comlibZipPath);
+      const comlibPath = path.join(targetPath, "comlib");
+      zip.extractAllTo(comlibPath, true);
+      // 删除下载的zip包
+      fse.removeSync(comlibZipPath);
+    } else {
+      await fse.copy(path.join(__dirname, "./template/comlib"), path.join(targetPath, "comlib"), { overwrite: true })
+    }
+  }
+}
+
+const copyComponents = (params, config) => {
+  const { data } = params;
+  const { download } = data;
+  const { targetPath, importComponentCode, declaredComponentCode, appConfig } = config;
+
+  // 拷贝components
+  if (download.source === "ohpmLibrary") {
+    fse.copySync(path.join(__dirname, "./template/components/IndexOhpmLibrary.ets"), path.join(targetPath, "components/index.ets"), { overwrite: true })
+    fse.writeFileSync(
+      path.join(targetPath, "components/index.ets"),
+      (fse.readFileSync(path.join(__dirname, "./template/components/IndexOhpmLibrary.ets"), 'utf-8'))
+        .replace(
+          "{ domain: undefined }",
+          `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
+        )
+    );
+  } else {
+    fse.copySync(path.join(__dirname, "./template/components/index.ets"), path.join(targetPath, "components/index.ets"), { overwrite: true })
+    fse.writeFileSync(
+      path.join(targetPath, "components/index.ets"),
+      (fse.readFileSync(path.join(__dirname, "./template/components/index.ets"), 'utf-8'))
+        .replace(
+          "{ domain: undefined }",
+          `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
+        )
+        .replace("$r('app.components.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../comlib/Index"` : "")
+        .replace("$r('app.components.component.declared')", declaredComponentCode)
+    );
+  }
+}
+
+const copyJs = (params, config) => {
+  const { data } = params;
+  const { download } = data;
+  const { targetPath, code } = config;
+
+  const jsCodePath = path.join(targetPath, download.source === "ohpmLibrary" ? "components/codes.ts" : "components/codes.js");
+  fse.ensureFileSync(jsCodePath)
+  fse.writeFileSync(jsCodePath, download.source === "ohpmLibrary" ? `export default function({ createJSHandle, context }) {
+    const comModules = {};
+    ${code};
+    return comModules;
+  }` : `export default (function(comModules) {
+    ${code};
+    return comModules;
+  })({})`, { encoding: "utf8" })
+}
+
+const handleApiCode = (params, config) => {
+  const { data } = params;
+  const { download } = data;
+  const { code } = config;
+  return code
+    .replace("$r('app.api.import.utils')",
+      download.source === "sourceCode" ?
+        'import { MyBricks } from "./utils/types";\nimport { transformApi } from "./utils/mybricks"\n;' :
+        'import { MyBricks, transformApi } from "@mybricks/render-utils";'
+    );
+}
+
 const compilerHarmonyApp = async (params, config) => {
   const { data, projectPath, projectName, fileName, depModules, origin, type, fileId, domainName, useLog = true } = params;
   const { Logger } = config;
-  const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson, comlibs } = data;
+  const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson, comlibs, download } = data;
 
   // 目标项目路径
-  const targetAppPath = path.join(projectPath, `Application_${new Date().getTime()}`);
+  // const targetAppPath = path.join(projectPath, `Application_${new Date().getTime()}`);
+  const targetAppPath = path.join(projectPath, download.fileName || "Application");
+
   // 拷贝项目
-  await fse.copy(path.join(__dirname, "./template/Application"), targetAppPath, { overwrite: true }) // [临时注释]
+  await fse.copy(path.join(__dirname, "./template/Application"), targetAppPath, { overwrite: true })
 
   // est路径
   const targetEtsPath = path.join(targetAppPath, "entry/src/main/ets");
 
-  // 写utils/mybricks.js
-  await fse.writeFile(
-    path.join(targetEtsPath, "utils/mybricks.js"),
-    createUtilsMybricks({ useLog }),
-    'utf-8'
-  )
+  // 拷贝oh-package
+  await copyOhPackage(params, {
+    targetPath: targetEtsPath
+  })
 
-  if (comlibs?.[0]?.hmCode) {
-    // 配置组件库，使用远程组件库源码
-    const comlibZipPath = path.join(targetAppPath, "comlib.zip");
-    await downloadZip({
-      url: `${domainName}${comlibs?.[0].hmCode}`,
-      targetPath: comlibZipPath
-    })
-    const zip = new AdmZip(comlibZipPath);
-    const comlibPath = path.join(targetEtsPath, "comlib");
-    fse.removeSync(comlibPath)
-    zip.extractAllTo(comlibPath, true);
-    // 删除下载的zip包
-    fse.removeSync(comlibZipPath);
-  }
+  // 拷贝utils
+  await copyUtils(params, {
+    targetPath: targetEtsPath
+  })
+
+  // 拷贝组件库
+  await copyComlib(params, {
+    targetPath: targetEtsPath
+  })
 
   /** 记录场景ID的映射关系 */
   const sceneMap = {}
@@ -61,7 +183,6 @@ const compilerHarmonyApp = async (params, config) => {
 
   // 安装模块数据
   const modulesData = await getModules(installedModules)
-  
 
   const pageCode = await getPageCode({
     key: "app",
@@ -73,6 +194,7 @@ const compilerHarmonyApp = async (params, config) => {
       appConfig,
       tabBarJson
     },
+    download,
     useLog
   }, modulesData)
 
@@ -80,26 +202,42 @@ const compilerHarmonyApp = async (params, config) => {
     const { pageCode, moduleName, usedComponentsMap, data } = value;
     const moduleNames = new Set<string>();
     let apiCode = fse.readFileSync(path.join(__dirname, "./template/api.ets"), "utf-8");
+
+    let extensionApiCode = "";
+
     pageCode.forEach((page) => {
-      if (page.type === "extensionEvent") {
-        // 业务模块
-        apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.open')", page.content)
+      // if (page.type === "extensionEvent") {
+      //   // 业务模块
+      //   apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.open')", page.content)
+      //   return
+      // }
+      if (page.type === "extension-config") {
+        // 配置
+        apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.config')", `(${page.meta.inputs?.length ? "value: MyBricks.Any" : ""}) => {
+          ${page.content}
+        }`);
         return
       }
-  
+
+      if (page.type === "extension-api") {
+        // API
+        extensionApiCode = extensionApiCode + page.content
+        return
+      }
+
       if (page.type === "global") {
         // 全局变量、全局Fx
-        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/_proxy/global.ets`), handleGlobalCode(page), { encoding: "utf8" })
+        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/components/global.ets`), handleGlobalCode(page, { params }), { encoding: "utf8" })
         return
       }
-  
+
       if (page.type === "module") {
         moduleNames.add(page.name);
-        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/sections/${page.name}.ets`), handleModuleCode(page), { encoding: "utf8" })
+        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/sections/${page.name}.ets`), handleModuleCode(page, { params }), { encoding: "utf8" })
         return
       }
-  
-  
+
+
       if (page.meta) {
         const pageName = page.name + "Page";
 
@@ -107,7 +245,7 @@ const compilerHarmonyApp = async (params, config) => {
 
         if (moduleName === "app") {
           // 目前仅处理app
-          const tabBar = data.pages.filter(p => 
+          const tabBar = data.pages.filter(p =>
             (data.tabBarJson || []).some(
               (b) => b?.id === p?.id
             )
@@ -134,19 +272,21 @@ const compilerHarmonyApp = async (params, config) => {
           path: `modules/${moduleName}/pages/${pageName}`
         }
       }
-  
+
       let content = "";
       if (page.type === "normal") {
         const { pageConfig } = data.pages.find(p => p.id === page.meta?.id) ?? {}
         // 页面
-        content = handlePageCode(page, pageConfig);
+        content = handlePageCode(page, { pageConfig, params });
       } else if (page.type === "popup") {
         // 弹窗
-        content = handlePopupCode(page);
+        content = handlePopupCode(page, { params });
       }
-  
+
       fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/pages/${page.name}Page.ets`), content, { encoding: "utf8" })
     });
+
+    apiCode = apiCode.replace("$r('app.api.apis')", extensionApiCode).replace("$r('app.api.import')", "").replace("$r('app.api.config')", "() => {}");
 
     if (moduleNames.size) {
       // 有区块，补充区块的入口文件
@@ -160,29 +300,34 @@ const compilerHarmonyApp = async (params, config) => {
 
     const { importComponentCode, declaredComponentCode } = getUsedComponent({ usedComponentsMap, componentMetaMap, verbose: useLog })
 
-    fse.writeFileSync(
-      path.join(targetEtsPath, `modules/${moduleName}/_proxy/Index.ets`),
-        fse.readFileSync(path.join(__dirname, "./template/_proxy/Index.ets"), "utf-8")
-        .replace(
-          "{ domain: undefined }",
-          `{ domain: ${data.appConfig?.defaultCallServiceHost ? JSON.stringify(data.appConfig?.defaultCallServiceHost) : undefined}}`,
-        )
-        .replace("$r('app._proxy.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
-        .replace("$r('app._proxy.component.declared')", declaredComponentCode)
-    );
+    copyComponents(params, {
+      targetPath: path.join(targetEtsPath, `modules/${moduleName}`),
+      importComponentCode,
+      declaredComponentCode,
+      appConfig
+    })
+
+    // fse.writeFileSync(
+    //   path.join(targetEtsPath, `modules/${moduleName}/components/index.ets`),
+    //   fse.readFileSync(path.join(__dirname, "./template/components/index.ets"), "utf-8")
+    //     .replace(
+    //       "{ domain: undefined }",
+    //       `{ domain: ${data.appConfig?.defaultCallServiceHost ? JSON.stringify(data.appConfig?.defaultCallServiceHost) : undefined}}`,
+    //     )
+    //     .replace("$r('app.components.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
+    //     .replace("$r('app.components.component.declared')", declaredComponentCode)
+    // );
 
     if (key !== "app") {
       // app不需要api
-      fse.writeFileSync(path.join(targetEtsPath, `modules/${moduleName}/api.ets`), apiCode)
+      fse.writeFileSync(path.join(targetEtsPath, `modules/${moduleName}/api.ets`), handleApiCode(params, { code: apiCode }))
     }
-  
+
     // 写入搭建Js
-    const jsCodePath = path.join(targetEtsPath, `modules/${moduleName}/_proxy/codes.js`);
-    fse.ensureFileSync(jsCodePath)
-    fse.writeFileSync(jsCodePath, `export default (function(comModules) {
-      ${decodeURIComponent(data.allModules?.all)};
-      return comModules;
-    })({})`, { encoding: "utf8" })
+    copyJs(params, {
+      targetPath: path.join(targetEtsPath, `modules/${moduleName}`),
+      code: decodeURIComponent(data.allModules?.all)
+    });
   })
 
   // 默认只有主应用中才会有标签页，所以对tabbar的判断仅针对app
@@ -199,7 +344,7 @@ const compilerHarmonyApp = async (params, config) => {
   const entryScene = sceneMap[`app_${data.entryPageId}`]
 
   // tabbar场景
-  tabbarScenes.push(...data.pages.filter(p => 
+  tabbarScenes.push(...data.pages.filter(p =>
     (data.tabBarJson || []).some(
       (b) => b?.id === p?.id
     )

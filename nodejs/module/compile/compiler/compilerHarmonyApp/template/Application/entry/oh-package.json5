@@ -7,7 +7,7 @@
   "license": "",
   "dependencies": {
     "dayjs": "1.11.13",
-    "@ohos/axios": "2.2.6"
+    "@ohos/axios": "2.2.6"$r('app.oh.package.dependencies')
   }
 }
 
