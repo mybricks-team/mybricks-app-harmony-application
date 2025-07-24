@@ -164,21 +164,22 @@ function calculateJsComponent({tojson, version, origin, module}) {
         id,
         title,
         schema,
-        rels: pinRels[`_rootFrame_-${id}`],
+        // rels: pinRels[`_rootFrame_-${id}`],
+        rels: mainScene.outputs.map(({ id }) => id)
       };
     });
 
-  const outputs = mainScene.outputs.map(({ id, title, schema }) => {
-    if (!relsOutputsMap[id]) {
-      noRelsOutputs.push({ id, title, schema });
-    }
+  // const outputs = mainScene.outputs.map(({ id, title, schema }) => {
+  //   if (!relsOutputsMap[id]) {
+  //     noRelsOutputs.push({ id, title, schema });
+  //   }
 
-    return {
-      id,
-      title,
-      schema,
-    };
-  });
+  //   return {
+  //     id,
+  //     title,
+  //     schema,
+  //   };
+  // });
 
   // outputs: ${JSON.stringify(outputs)},
   // [TODO] version
@@ -190,7 +191,7 @@ function calculateJsComponent({tojson, version, origin, module}) {
     rtType: "js",
     data: ${JSON.stringify({ config })},
     inputs: ${JSON.stringify(inputs)},
-    outputs: [],
+    outputs: ${JSON.stringify(mainScene.outputs)},
     isCloudComponent: true,
     editors: (${editors
       .replace('"--replace-title--"', `"${mainScene.title}"`)
@@ -241,6 +242,7 @@ const getModule = async (params) => {
   let comArayCode = "";
   toJson.scenes.forEach((scene) => {
     if (Array.isArray(httpPlugin?.connectors)) {
+    // 模块内的服务接口插件数据
     Object.entries(scene.coms).forEach(([_, com]: any) => {
       if (com.def.namespace === "mybricks.harmony._connector") {
         const comConnector = com.model.data.connector;
@@ -271,21 +273,25 @@ const getModule = async (params) => {
     })
   })
 
-  const callback = []
+  // const callback = []
+  // callback: ${JSON.stringify(callback)}
 
   toJson.global.fxFrames.forEach((fxFrame) => {
-    if (fxFrame.type === "extension") {
+    if (fxFrame.type === "extension-api") {
       comArayCode += `${calculateJsComponent({tojson: fxFrame, version, origin, module})},`
-      fxFrame.outputs.forEach((output) => {
-        callback.push({
-          id: output.id,
-          title: output.title,
-          schema: {
-            type: "any",
-          }
-        })
-      })
     }
+    // if (fxFrame.type === "extension") {
+    //   comArayCode += `${calculateJsComponent({tojson: fxFrame, version, origin, module})},`
+    //   fxFrame.outputs.forEach((output) => {
+    //     callback.push({
+    //       id: output.id,
+    //       title: output.title,
+    //       schema: {
+    //         type: "any",
+    //       }
+    //     })
+    //   })
+    // }
   })
 
   return {
@@ -293,11 +299,9 @@ const getModule = async (params) => {
   const baseToJson = ${JSON.stringify(baseToJson)}
   window.module_${module.id} = {
     id: ${module.id},
-    comAray: [],
     title: "${module.title}",
     version: "${harmonyModule.version}",
     comAray: [${comArayCode}],
-    callback: ${JSON.stringify(callback)}
   }
 })()`
   }
