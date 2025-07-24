@@ -7,3 +7,4 @@ export { default as createUtilsMybricks } from "./createUtilsMybricks";
 export * from "./string";
 export * from "./code";
 export * from "./download";
+export * from "./admZip";

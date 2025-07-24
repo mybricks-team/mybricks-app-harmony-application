@@ -1,9 +1,5 @@
-import toHarmonyCode from "@mybricks/to-code-react/dist/cjs/toHarmonyCode"
 import * as path from "path";
 import * as fse from "fs-extra";
-import { pinyin, cleanAndSplitString, firstCharToUpperCase } from "./utils";
-import API from "@mybricks/sdk-for-app/api";
-import * as AdmZip from 'adm-zip';
 import {
   getPageCode,
   handleModuleCode,
@@ -14,11 +10,10 @@ import {
   handleGlobalCode,
   getModules,
   downloadZip,
-  createUtilsMybricks
+  createUtilsMybricks,
+  firstCharToUpperCase,
+  AdmZip
 } from "./utils";
-
-/** 组件、控制器等导出路径 */
-const PROXY_PACKAGE_NAME = "../_proxy/Index"
 
 const compilerHarmonyApp = async (params, config) => {
   const { data, projectPath, projectName, fileName, depModules, origin, type, fileId, domainName, useLog = true } = params;
@@ -81,8 +76,6 @@ const compilerHarmonyApp = async (params, config) => {
     useLog
   }, modulesData)
 
-  // fse.writeJson("tojson.json", pageCode, "utf-8") // 临时方便调试
-
   Object.entries(pageCode).forEach(([key, value]: any) => {
     const { pageCode, moduleName, usedComponentsMap, data } = value;
     const moduleNames = new Set<string>();
@@ -108,7 +101,6 @@ const compilerHarmonyApp = async (params, config) => {
   
   
       if (page.meta) {
-        // const pageFileName = firstCharToUpperCase(`${page.name}Page`);
         const pageName = page.name + "Page";
 
         let pushNormalScenes = true
@@ -128,7 +120,6 @@ const compilerHarmonyApp = async (params, config) => {
 
         if (pushNormalScenes) {
           normalScenes.push({
-            // id: page.meta.id,
             id: `${moduleName}_${page.meta.id}`,
             title: page.meta.title,
             pageName: firstCharToUpperCase(`${moduleName}${pageName}`),
@@ -137,13 +128,11 @@ const compilerHarmonyApp = async (params, config) => {
         }
 
         sceneMap[`${key}_${page.meta.id}`] = {
-          // id: page.meta.id,
           id: `${moduleName}_${page.meta.id}`,
           title: page.meta.title,
           pageName: firstCharToUpperCase(`${moduleName}${pageName}`),
           path: `modules/${moduleName}/pages/${pageName}`
         }
-        // sceneMap[page.meta.id] = page.meta;
       }
   
       let content = "";
@@ -218,23 +207,6 @@ const compilerHarmonyApp = async (params, config) => {
     return sceneMap[`app_${p.id}`]
   }))
 
-  // 普通场景 - 
-  // normalScenes.unshift(...data.pages.filter(p => 
-  //   !(data.tabBarJson || []).some(
-  //     (b) => b?.id === p?.id
-  //   )
-  // ).map(p => {
-  //   return sceneMap[`app_${p.id}`]
-  // }))
-
-  // 弹窗也写入普通场景判断中
-  // data.toJson.scenes.forEach((scene) => {
-  //   if (scene.type === "popup") {
-  //     normalScenes.unshift(sceneMap[`app_${scene.id}`])
-  //   }
-  // })
-
-
   // 入口文件
   const entryPath = path.join(targetEtsPath, `./pages/Index.ets`);
   let entryFileContent = fse.readFileSync(entryPath, 'utf-8')
@@ -246,17 +218,6 @@ const compilerHarmonyApp = async (params, config) => {
     entryScene
   })
   fse.writeFileSync(entryPath, entryFileContent, 'utf-8')
-
-  // const entryPath = path.join(targetEtsPath, "./pages/Index.ets");
-  // await fse.copy(path.join(__dirname, "./hm/pages/Index.ets"), entryPath, { overwrite: true });
-    
-  
-
-
-  // const res = getPageCode({ toJson })
-  
-
-  console.log("开始下载咯")
 }
 
 export default compilerHarmonyApp;
