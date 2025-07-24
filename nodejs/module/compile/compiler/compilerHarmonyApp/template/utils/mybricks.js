@@ -1,13 +1,26 @@
 const log = (...args) => {
-  console.log(`[MyBricks]`, ...args)
+  console.log("[MyBricks]", ...args)
+}
+
+const logger = {
+  info: log,
+  warn: log,
+  error: log,
+}
+
+const EXE_TITLE_MAP = {
+  output: "输出",
+  input: "输入"
 }
 
 /** 数据流 */
 export class Subject {
   _values = []
   _observers = new Set()
+  _log = undefined
 
-  constructor() {
+  constructor(params = {}) {
+    this._log = params.log
   }
 
   get value() {
@@ -15,6 +28,7 @@ export class Subject {
   }
 
   next(value) {
+    log(this._log, JSON.stringify(value))
     this._values[0] = value
     this._observers.forEach((observer) => observer(value))
   }
@@ -53,13 +67,15 @@ export const validateJsMultipleInputs = (input) => {
 }
 
 /** 组件的输入 */
-const createReactiveInputHandler = (input, value, rels) => {
+const createReactiveInputHandler = (params) => {
+  const { input, value, rels, title } = params;
   if (value?.subscribe) {
     value.subscribe((value) => {
       input(value, new Proxy({}, {
         get(_, key) {
           return (value) => {
-            (rels[key] || (rels[key] = new Subject())).next(value)
+            (rels[key] ||
+              (rels[key] = new Subject({ log: `${EXE_TITLE_MAP["output"]} ${title} | ${key}` }))).next(value)
           }
         }
       }))
@@ -69,7 +85,8 @@ const createReactiveInputHandler = (input, value, rels) => {
       {
         get(_, key) {
           return (value) => {
-            (rels[key] || (rels[key] = new Subject())).next(value)
+            (rels[key] ||
+              (rels[key] = new Subject({ log: `${EXE_TITLE_MAP["output"]} ${title} | ${key}` }))).next(value)
           }
         }
       }
@@ -79,7 +96,7 @@ const createReactiveInputHandler = (input, value, rels) => {
   return new Proxy({},
     {
       get(_, key) {
-        return rels[key] || (rels[key] = new Subject())
+        return rels[key] || (rels[key] = new Subject({ log: `${EXE_TITLE_MAP["output"]} ${title} | ${key}` }))
       }
     }
   )
@@ -92,6 +109,8 @@ export const createInputsHandle = (that, init = false) => {
     const _inputEvents = {}
     /** 输入未完成注册，写入todo列表 */
     const _inputEventsTodo = {}
+    /** 组件基础信息 */
+    const _comInfo = {}
 
     const proxy = new Proxy({}, {
       get(_, key) {
@@ -100,7 +119,10 @@ export const createInputsHandle = (that, init = false) => {
           return _inputEvents;
         } else if (key === "_inputEventsTodo") {
           return _inputEventsTodo
+        } else if (key === "_comInfo") {
+          return _comInfo
         }
+
         return (value) => {
           if (!_inputEvents[key]) {
             // 组件未完成输入注册
@@ -122,54 +144,79 @@ export const createInputsHandle = (that, init = false) => {
             })
           }
 
-          return createReactiveInputHandler(_inputEvents[key], value, {})
+          return createReactiveInputHandler({
+            input(value, proxy) {
+              log(`${EXE_TITLE_MAP["input"]} ${_comInfo.title} | ${key}`, JSON.stringify(value))
+              return _inputEvents[key](value, proxy)
+            },
+            title: _comInfo.title,
+            value,
+            rels: {}
+          })
         }
       }
     })
 
     return proxy;
   } else {
-    const { controller, columnVisibilityController } = that
-    const { _inputEvents } = controller
+    const { controller, columnVisibilityController, title } = that
+    const { _inputEvents, _comInfo, _inputEventsTodo } = controller
+    _comInfo.title = title;
+
+    const createVisibilityHandler = (visibilityState) => {
+      return (value) => {
+        const setVisibility = () => {
+          columnVisibilityController.setVisibility(visibilityState)
+        }
+        if (value?.subscribe) {
+          value.subscribe(setVisibility);
+        } else {
+          setVisibility()
+        }
+      };
+    };
 
     // 内置显示隐藏逻辑
-    _inputEvents.show = (value) => {
-      if (value?.subscribe) {
-        value.subscribe(() => {
-          columnVisibilityController.setVisibility(Visibility.Visible)
-        });
-      } else {
-        columnVisibilityController.setVisibility(Visibility.Visible)
-      }
-    }
-    _inputEvents.hide = (value) => {
-      if (value?.subscribe) {
-        value.subscribe(() => {
-          columnVisibilityController.setVisibility(Visibility.None)
-        });
-      } else {
-        columnVisibilityController.setVisibility(Visibility.None)
-      }
-    }
+    _inputEvents.show = createVisibilityHandler(Visibility.Visible)
+    _inputEvents.hide = createVisibilityHandler(Visibility.None)
     _inputEvents.showOrHide = (value) => {
-      if (value?.subscribe) {
-        value.subscribe((value) => {
-          columnVisibilityController.setVisibility(!!value ? Visibility.Visible : Visibility.None)
-        });
-      } else {
+      const setVisibility = (value) => {
         columnVisibilityController.setVisibility(!!value ? Visibility.Visible : Visibility.None)
       }
+      if (value?.subscribe) {
+        value.subscribe(setVisibility)
+      } else {
+        setVisibility(value)
+      }
     }
+    // 处理显示隐藏todo项
+    ["show", "hide", "showOrHide"].forEach((key) => {
+      const todo = _inputEventsTodo[key]
+      if (todo) {
+        Reflect.deleteProperty(_inputEventsTodo, key)
+
+        todo.forEach(({ value }) => {
+          _inputEvents[key](value)
+        })
+      }
+    })
 
     const proxy = new Proxy(controller, {
       get(_, key) {
         return (input) => {
           if (!_inputEvents[key]) {
             // 第一次注册，处理TODO
-            const _inputEventsTodo = controller._inputEventsTodo
             if (_inputEventsTodo[key]) {
               _inputEventsTodo[key].forEach(({ value, rels }) => {
-                createReactiveInputHandler(input, value, rels)
+                createReactiveInputHandler({
+                  input(value, proxy) {
+                    log(`${EXE_TITLE_MAP["input"]} ${title} | ${key}`, JSON.stringify(value))
+                    return input(value, proxy)
+                  },
+                  title,
+                  value,
+                  rels
+                })
               })
               Reflect.deleteProperty(_inputEventsTodo, key)
             }
@@ -188,8 +235,7 @@ export const createInputsHandle = (that, init = false) => {
 export const createJSHandle = (fn, options) => {
   let controller
 
-  const props = options?.props;
-  const env = options?.env
+  const { props, env } = options
 
   const inputs = new Proxy({}, {
     getOwnPropertyDescriptor() {
@@ -223,7 +269,8 @@ export const createJSHandle = (fn, options) => {
     },
     get(_, key) {
       return (value) => {
-        (rels[key] || (rels[key] = new Subject())).next(value)
+        (rels[key] ||
+          (rels[key] = new Subject({ log: `${EXE_TITLE_MAP["output"]} ${props.title} | ${key}` }))).next(value)
       }
     }
   })
@@ -232,7 +279,7 @@ export const createJSHandle = (fn, options) => {
     data: props.data,
     inputs,
     outputs,
-    logger: log,
+    logger,
     env
   })
 
@@ -244,7 +291,7 @@ export const createJSHandle = (fn, options) => {
     {},
     {
       get(_, key) {
-        return rels[key] || (rels[key] = new Subject())
+        return rels[key] || (rels[key] = new Subject({ log: `${EXE_TITLE_MAP["output"]} ${props.title} | ${key}` }))
       },
     },
   )
@@ -259,17 +306,30 @@ export const createJSHandle = (fn, options) => {
         args.forEach((value, index) => {
           if (value?.subscribe) {
             value.subscribe((value) => {
+              log(`${EXE_TITLE_MAP["input"]} ${props.title} | ${props.inputs[index]}`, JSON.stringify(value));
               valueAry[props.inputs[index]] = value
               if (Object.keys(valueAry).length === length) {
-                createReactiveInputHandler(controller, valueAry, rels)
+                createReactiveInputHandler({
+                  input: controller,
+                  value: valueAry,
+                  rels,
+                  title: props.title
+                })
                 // 触发输入后清除
                 valueAry = {}
               }
             })
           } else {
+            log(`${EXE_TITLE_MAP["input"]} ${props.title} | ${props.inputs[index]}`, JSON.stringify(value));
             valueAry[props.inputs[index]] = value
+
             if (Object.keys(valueAry).length === length) {
-              createReactiveInputHandler(controller, valueAry, rels)
+              createReactiveInputHandler({
+                input: controller,
+                value: valueAry,
+                rels,
+                title: props.title
+              })
               // 触发输入后清除
               valueAry = {}
             }
@@ -280,10 +340,22 @@ export const createJSHandle = (fn, options) => {
         const value = args[0]
         if (value?.subscribe) {
           value.subscribe((value) => {
-            createReactiveInputHandler(controller, value, rels)
+            log(`${EXE_TITLE_MAP["input"]} ${props.title} | ${props.inputs[0]}`, JSON.stringify(value));
+            createReactiveInputHandler({
+              input: controller,
+              value,
+              rels,
+              title: props.title
+            })
           })
         } else {
-          createReactiveInputHandler(controller, value, rels)
+          log(`${EXE_TITLE_MAP["input"]} ${props.title} | ${props.inputs[0]}`, JSON.stringify(value));
+          createReactiveInputHandler({
+            input: controller,
+            value,
+            rels,
+            title: props.title
+          })
         }
       }
     }
@@ -298,7 +370,8 @@ export const createJSHandle = (fn, options) => {
 export const createEventsHandle = (params) => {
   return new Proxy(params.events, {
     get(target, key) {
-      return target[key] || (() => {})
+      return target[key] || (() => {
+      })
     }
   })
 }
@@ -436,7 +509,8 @@ export const createVariable = (initValue, callBack) => {
   const value = new Subject()
   value.next(initValue)
   const ref = {
-    value
+    value,
+    valueChanges: new Set()
   }
 
   return {
@@ -457,6 +531,9 @@ export const createVariable = (initValue, callBack) => {
       const nextValue = new Subject()
       const next = (value) => {
         ref.value.next(value)
+        ref.valueChanges.forEach((valueChange) => {
+          valueChange(value)
+        })
         nextValue.next(value)
         callBack(value)
       }
@@ -474,6 +551,9 @@ export const createVariable = (initValue, callBack) => {
       const nextValue = new Subject()
       const next = () => {
         ref.value.next(initValue)
+        ref.valueChanges.forEach((valueChange) => {
+          valueChange(initValue)
+        })
         nextValue.next(initValue)
         callBack(initValue)
       }
@@ -485,6 +565,35 @@ export const createVariable = (initValue, callBack) => {
         next()
       }
       return nextValue
+    },
+    /** 值变更监听 */
+    changed() {
+      const subject = new Subject();
+
+      const change = (value) => {
+        subject.next(value)
+      }
+
+      ref.valueChanges.add(change);
+
+      const result = {
+        destroy() {
+          ref.valueChanges.delete(change)
+        },
+        subscribe(next) {
+          subject.subscribe(next)
+        }
+      }
+
+      if (apiRun) {
+        if (!apiRunVariablesSubject[apiRun]) {
+          apiRunVariablesSubject[apiRun] = [result]
+        } else {
+          apiRunVariablesSubject[apiRun].push(result)
+        }
+      }
+
+      return result
     }
   }
 }
@@ -585,8 +694,8 @@ export const createSlotsIO = () => {
   })
 }
 
-/** 
- * 模块 
+/**
+ * 模块
  * [TODO] 暂时无法在多处使用关联输出项
  */
 export const createModuleInputsHandle = () => {
@@ -653,4 +762,44 @@ export const createStyles = (params) => {
     return other
   }
   return styles
+}
+
+/** [TODO] 记录API调用过程中变量的监听，调用回调后销毁 */
+let apiRun = null;
+let apiRunVariablesSubject = {};
+
+export const api = (fn) => {
+  return (value, cb = {}) => {
+    const id = Math.random();
+    let isDestroy = false;
+    apiRun = id;
+    fn(value, new Proxy(cb, {
+      get(target, key) {
+        return (value) => {
+          if (value?.subscribe) {
+            value.subscribe((next) => {
+              if (isDestroy) {
+                return
+              }
+              isDestroy = true
+              target[key]?.(next)
+              apiRunVariablesSubject[id]?.forEach((subject) => {
+                subject.destroy()
+              })
+            })
+          } else {
+            if (isDestroy) {
+              return
+            }
+            isDestroy = true
+            target[key]?.(value)
+            apiRunVariablesSubject[id]?.forEach((subject) => {
+              subject.destroy()
+            })
+          }
+        }
+      }
+    }))
+    apiRun = null;
+  }
 }

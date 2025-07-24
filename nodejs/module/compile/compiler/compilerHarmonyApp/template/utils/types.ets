@@ -1,5 +1,5 @@
 import { AnyType, AnyObjectType } from "./any"
-import { Subject } from "./mybricks"
+import { Subject } from "../utils/mybricks"
 
 export declare namespace MyBricks {
   type Any = AnyType
@@ -14,7 +14,7 @@ export declare namespace MyBricks {
   type Events = Any
 
   /** 组件控制器 */
-  type Controller = Record<string, (value: EventValue) => Record<string, Any>>
+  type Controller = Record<string, (value?: EventValue) => Record<string, Any>>
 
   /** 模块控制器 */
   interface ModuleController extends Record<string, (value: EventValue) => Record<string, Any>> {
@@ -83,4 +83,6 @@ export declare namespace MyBricks {
     set: (value: Any) => Subject
     reset: (value: Any) => Subject
   }
+
+  type Api = Any
 }
