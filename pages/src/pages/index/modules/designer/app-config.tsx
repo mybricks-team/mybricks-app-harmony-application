@@ -1307,7 +1307,6 @@ const getAiView = (enableAI, option) => {
       },
       async requestAsStream(messages, ...args) {
         const { context, tools, model, role } = getDesignerParams(args);
-        debugger
         const { write, complete, error, cancel } = context ?? {};
         // 用于debug用户当前使用的模型
         window._ai_use_model_ = model;
