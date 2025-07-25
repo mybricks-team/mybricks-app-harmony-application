@@ -184,6 +184,21 @@ const compilerHarmonyApp = async (params, config) => {
   // 安装模块数据
   const modulesData = await getModules(installedModules)
 
+  const busMap: any = {};
+  toJson.global.fxFrames.forEach((fxFrame) => {
+    const { name, type, title } = fxFrame;
+    if (type === "extension-bus") {
+      if (name === "bus-getUser") {
+        busMap["mybricks.core-comlib.bus-getUser"] = {
+          title,
+        };
+      }
+    }
+  });
+  const getBus = (namespace: string) => {
+    return busMap[namespace];
+  };
+
   const pageCode = await getPageCode({
     key: "app",
     moduleName: "app",
@@ -194,6 +209,7 @@ const compilerHarmonyApp = async (params, config) => {
       appConfig,
       tabBarJson
     },
+    getBus,
     download,
     useLog
   }, modulesData)
