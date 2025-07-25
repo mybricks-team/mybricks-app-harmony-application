@@ -198,6 +198,9 @@ const compilerHarmonyApp = async (params, config) => {
   const getBus = (namespace: string) => {
     return busMap[namespace];
   };
+  const getApi = (namespace: string) => {
+    return componentMetaMap[namespace];
+  };
 
   const pageCode = await getPageCode({
     key: "app",
@@ -210,6 +213,7 @@ const compilerHarmonyApp = async (params, config) => {
       tabBarJson
     },
     getBus,
+    getApi,
     download,
     useLog
   }, modulesData)
