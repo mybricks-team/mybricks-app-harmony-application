@@ -221,6 +221,8 @@ const getModule = async (params) => {
 
   const { publishId } = harmonyModule.content
   const publishContent = await API.File.getPublishContent({ pubId: publishId });
+  const file: any = await API.File.getFile({ id: publishContent.fileId });
+
   // [TODO]
   const module = publishContent.content;
   const { toJson, sectionsMap } = module.data;
@@ -302,6 +304,8 @@ const getModule = async (params) => {
     title: "${module.title}",
     version: "${harmonyModule.version}",
     comAray: [${comArayCode}],
+    updateTime: "${publishContent.updateTime}",
+    author: "${file.creatorName || "-"}",
   }
 })()`
   }
