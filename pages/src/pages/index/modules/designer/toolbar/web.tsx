@@ -156,9 +156,9 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
           placement="bottom"
           title={"发布到物料中心"}
         > */}
-          <div className={css.publish_btn} onClick={publishHandle} data-mybricks-tip={`{content:'发布到物料中心',position:'bottom'}`}>
+          {/* <div className={css.publish_btn} onClick={publishHandle} data-mybricks-tip={`{content:'发布到物料中心',position:'bottom'}`}>
             {publish}
-          </div>
+          </div> */}
         {/* </Tooltip> */}
 
         {/* <Tooltip
