@@ -168,7 +168,7 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
           <div
             className={`${css.export_btn} ${showExportPanel ? css.active_btn : ""}`}
             onClick={() => setShowExportPanel(true)}
-            data-mybricks-tip={`{content:'导出模块源码',position:'left'}`}
+            data-mybricks-tip={`{content:'导出源码',position:'left'}`}
           >
             {Export}
           </div>

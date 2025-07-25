@@ -1,4 +1,5 @@
 export default {
+  title: '系统总线',
   cards: [
     // {
     //   id: 'openRouter',
