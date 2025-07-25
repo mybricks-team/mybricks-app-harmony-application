@@ -9,7 +9,8 @@ const handlePageCode = (page, {
     navigationStyle = 'default',
     showBackIcon = false
   },
-  params
+  params,
+  key
 }) => {
   const { data } = params;
   const { download } = data;
@@ -27,6 +28,21 @@ const handlePageCode = (page, {
       dependencyNames: ["Controller", "ModuleController"],
       importType: "named",
     });
+  }
+  if (page.content.includes("bus.")) {
+    if (key === "app") {
+      page.importManager.addImport({
+        packageName: "../bus",
+        dependencyNames: ["bus"],
+        importType: "named",
+      });
+    } else {
+      page.importManager.addImport({
+        packageName: "../../app/bus",
+        dependencyNames: ["bus"],
+        importType: "named",
+      });
+    }
   }
 
   switch (navigationStyle) {

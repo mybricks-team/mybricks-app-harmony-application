@@ -8,9 +8,9 @@ import {
   getUsedComponent,
   handleEntryCode,
   handleGlobalCode,
+  handleExtensionBusCode,
   getModules,
   downloadZip,
-  createUtilsMybricks,
   firstCharToUpperCase,
   AdmZip
 } from "./utils";
@@ -211,6 +211,13 @@ const compilerHarmonyApp = async (params, config) => {
       //   apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.open')", page.content)
       //   return
       // }
+
+      // 正常也只有app会有extension-bus(系统总线)
+      if (key === "app" && page.type === "extension-bus") {
+         fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/bus.ets`), handleExtensionBusCode(page, { params }), { encoding: "utf8" })
+        return;
+      }
+
       if (page.type === "extension-config") {
         // 配置
         apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.config')", `(${page.meta.inputs?.length ? "value: MyBricks.Any" : ""}) => {
@@ -227,13 +234,13 @@ const compilerHarmonyApp = async (params, config) => {
 
       if (page.type === "global") {
         // 全局变量、全局Fx
-        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/components/global.ets`), handleGlobalCode(page, { params }), { encoding: "utf8" })
+        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/components/global.ets`), handleGlobalCode(page, { params, key }), { encoding: "utf8" })
         return
       }
 
       if (page.type === "module") {
         moduleNames.add(page.name);
-        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/sections/${page.name}.ets`), handleModuleCode(page, { params }), { encoding: "utf8" })
+        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/sections/${page.name}.ets`), handleModuleCode(page, { params, key }), { encoding: "utf8" })
         return
       }
 
@@ -277,10 +284,10 @@ const compilerHarmonyApp = async (params, config) => {
       if (page.type === "normal") {
         const { pageConfig } = data.pages.find(p => p.id === page.meta?.id) ?? {}
         // 页面
-        content = handlePageCode(page, { pageConfig, params });
+        content = handlePageCode(page, { pageConfig, params, key });
       } else if (page.type === "popup") {
         // 弹窗
-        content = handlePopupCode(page, { params });
+        content = handlePopupCode(page, { params, key });
       }
 
       fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/pages/${page.name}Page.ets`), content, { encoding: "utf8" })

@@ -1,6 +1,6 @@
 import { COMPONENT_PACKAGE_NAME, RENDER_UTILS_PACKAGE_NAME } from "../constant"
 
-const handlePopupCode = (page, { params }) => {
+const handlePopupCode = (page, { params, key }) => {
   const { data } = params;
   const { download } = data;
 
@@ -17,6 +17,21 @@ const handlePopupCode = (page, { params }) => {
       dependencyNames: ["Controller", "ModuleController"],
       importType: "named",
     });
+  }
+  if (page.content.includes("bus.")) {
+    if (key === "app") {
+      page.importManager.addImport({
+        packageName: "../bus",
+        dependencyNames: ["bus"],
+        importType: "named",
+      });
+    } else {
+      page.importManager.addImport({
+        packageName: "../../app/bus",
+        dependencyNames: ["bus"],
+        importType: "named",
+      });
+    }
   }
   return `${page.importManager.toCode()}
 

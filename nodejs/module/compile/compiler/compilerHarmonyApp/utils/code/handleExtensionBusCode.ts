@@ -1,6 +1,6 @@
 import { RENDER_UTILS_PACKAGE_NAME } from "../constant";
 
-const handleGlobalCode = (page, { params, key }) => {
+const handleExtensionBusCode = (page, { params }) => {
   const { data } = params;
   const { download } = data;
 
@@ -26,24 +26,18 @@ const handleGlobalCode = (page, { params, key }) => {
     });
   }
   if (page.content.includes("bus.")) {
-    if (key === "app") {
-      page.importManager.addImport({
-        packageName: "../bus",
-        dependencyNames: ["bus"],
-        importType: "named",
-      });
-    } else {
-      page.importManager.addImport({
-        packageName: "../../app/bus",
-        dependencyNames: ["bus"],
-        importType: "named",
-      });
-    }
+    page.content = page.content.replace("bus.", "this.");
   }
-
-  return `${page.importManager.toCode()}
+  
+  const code = `${page.importManager.toCode()}
   
   ${page.content}`
+
+  const regex = /(\.\.\/\.\.\/[^/]+)\/api/g;
+
+  return code.replace(regex, (str) => {
+    return str.slice(3)
+  })
 }
 
-export default handleGlobalCode;
+export default handleExtensionBusCode;
