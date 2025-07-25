@@ -229,8 +229,11 @@ const compilerHarmonyApp = async (params, config) => {
       // }
 
       // 正常也只有app会有extension-bus(系统总线)
-      if (key === "app" && page.type === "extension-bus") {
-         fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/bus.ets`), handleExtensionBusCode(page, { params }), { encoding: "utf8" })
+      if (page.type === "extension-bus") {
+        // 有脏数据，需要兼容下，正常只有app下才会有extension-bus
+        if (key === "app") {
+          fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/bus.ets`), handleExtensionBusCode(page, { params }), { encoding: "utf8" })
+        }
         return;
       }
 
