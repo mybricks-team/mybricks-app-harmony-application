@@ -1217,22 +1217,46 @@ const Designer = ({ appData }) => {
           download: params,
         })
 
+        const installedModules = designerRef.current.getInstalledModules()
+
         const getComponentMetaMap = () => {
+          const getComType = (type) => {
+            if (!type) {
+              return "ui"
+            }
+
+            return type.match(/^js/) ? "js" : "ui"
+          }
+
           const componentMetaMap = {};
         
           (window as any).__comlibs_edit_.forEach(({ id, namespace, comAray }) => {
             if (id && namespace) {
-              traverseComAry(comAray, id);
+              traverseComAry(comAray);
             }
           })
-        
-          function traverseComAry(comAry, npm) {
+
+          if (Array.isArray(installedModules)) {
+            installedModules.forEach((installedModule) => {
+              const module = window[`module_${installedModule.id}`]
+
+              if (module) {
+                traverseComAry(module.comAray);
+              }
+            })
+          }
+
+          function traverseComAry(comAry) {
             comAry.forEach((com) => {
               if (Array.isArray(com.comAray)) {
-                traverseComAry(com.comAray, npm);
+                traverseComAry(com.comAray);
               } else {
                 componentMetaMap[com.namespace] = {
-                  hasSlots: !!com.slots
+                  type: getComType(com.rtType),
+                  hasSlots: !!com.slots,
+                  hasInputs: !!com.inputs,
+                  hasOutputs: !!com.outputs,
+                  title: com.title
                 }
               }
             });
@@ -1259,7 +1283,7 @@ const Designer = ({ appData }) => {
               database: pageModel.appConfig.datasource,
               toJson,
               componentMetaMap: getComponentMetaMap(),
-              installedModules: designerRef.current.getInstalledModules(),
+              installedModules: installedModules,
               download: params,
               basic: {
                 name: pageModel.file.name,

@@ -5,7 +5,7 @@ import { COMPONENT_PACKAGE_NAME } from "./constant"
 import { firstCharToUpperCase } from "./string"
 
 const getPageCode = async (params, modulesData, result = { }) => {
-  const { key, moduleName, data, useLog, download, getBus } = params;
+  const { key, moduleName, data, useLog, download, getBus, getApi } = params;
   const { toJson } = data;
   const verbose = useLog;
   const usedComponentsMap = {};
@@ -82,6 +82,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
       return `${modulesData[key].moduleName}_${id}`;
     },
     getBus,
+    getApi,
     verbose,
   });
 
@@ -101,7 +102,8 @@ const getPageCode = async (params, modulesData, result = { }) => {
         data: module.data,
         download,
         useLog,
-        getBus
+        getBus,
+        getApi
       }, modulesData, result)
     }))
   }
