@@ -100,7 +100,12 @@ export class AppRouter {
   /** 返回上一页 */
   public pop(result?: Object) {
     if (result !== undefined) {
-      this.navPathStack.pop(result, true)
+      if (!isNaN(parseFloat(result as string))) {
+        const length = this.navPathStack.size();
+        this.navPathStack.popToIndex(length - 1 - parseFloat(result as string), true)
+      } else {
+        this.navPathStack.pop(result, true)
+      }
     } else {
       this.navPathStack.pop(true)
     }
