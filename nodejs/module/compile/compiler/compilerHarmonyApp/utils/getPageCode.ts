@@ -58,7 +58,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
 
       return {
         dependencyImport: {
-          packageName: download.source === "sourceCode" ? (config.source === "extensionEvent" ? "./components/Index" : COMPONENT_PACKAGE_NAME) : "@mybricks/comlib-harmony-normal",
+          packageName: download.source === "sourceCode" ? (config.source === "extensionEvent" ? "./components" : COMPONENT_PACKAGE_NAME) : "@mybricks/comlib-harmony-normal",
           dependencyNames,
           importType: "named",
         },
@@ -67,7 +67,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
     },
     getComponentPackageName(params) {
       if (params?.type === "extensionEvent") {
-        return download.source === "sourceCode" ? "./components/Index" : "./components"
+        return download.source === "sourceCode" ? "./components" : "./components"
       }
       return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "../components"
     },

@@ -22,10 +22,17 @@ const handlePageCode = (page, {
       importType: "named",
     });
   }
-  if (page.content.includes("controller:")) {
+  if (page.content.includes("Controller()")) {
     page.importManager.addImport({
       packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
-      dependencyNames: ["Controller", "ModuleController"],
+      dependencyNames: ["Controller"],
+      importType: "named",
+    });
+  }
+  if (page.content.includes("ModuleController()")) {
+    page.importManager.addImport({
+      packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      dependencyNames: ["ModuleController"],
       importType: "named",
     });
   }

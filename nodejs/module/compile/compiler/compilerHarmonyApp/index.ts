@@ -107,7 +107,7 @@ const copyComponents = (params, config) => {
           "{ domain: undefined }",
           `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
         )
-        .replace("$r('app.components.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../comlib/Index"` : "")
+        .replace("$r('app.components.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
         .replace("$r('app.components.component.declared')", declaredComponentCode)
     );
   }
@@ -118,16 +118,22 @@ const copyJs = (params, config) => {
   const { download } = data;
   const { targetPath, code } = config;
 
-  const jsCodePath = path.join(targetPath, download.source === "ohpmLibrary" ? "components/codes.ts" : "components/codes.js");
+  const jsCodePath = path.join(targetPath, "components/codes.ts");
+  // const jsCodePath = path.join(targetPath, download.source === "ohpmLibrary" ? "components/codes.ts" : "components/codes.js");
   fse.ensureFileSync(jsCodePath)
-  fse.writeFileSync(jsCodePath, download.source === "ohpmLibrary" ? `export default function({ createJSHandle, context }) {
+  fse.writeFileSync(jsCodePath, `export default function({ createJSHandle, context }) {
     const comModules = {};
     ${code};
     return comModules;
-  }` : `export default (function(comModules) {
-    ${code};
-    return comModules;
-  })({})`, { encoding: "utf8" })
+  }`, { encoding: "utf8" })
+  // fse.writeFileSync(jsCodePath, download.source === "ohpmLibrary" ? `export default function({ createJSHandle, context }) {
+  //   const comModules = {};
+  //   ${code};
+  //   return comModules;
+  // }` : `export default (function(comModules) {
+  //   ${code};
+  //   return comModules;
+  // })({})`, { encoding: "utf8" })
 }
 
 const handleApiCode = (params, config) => {
@@ -137,7 +143,7 @@ const handleApiCode = (params, config) => {
   return code
     .replace("$r('app.api.import.utils')",
       download.source === "sourceCode" ?
-        'import { MyBricks } from "./utils/types";\nimport { transformApi } from "./utils/mybricks"\n;' :
+        'import { MyBricks } from "../../utils/types";\nimport { transformApi } from "../../utils/mybricks"\n;' :
         'import { MyBricks, transformApi } from "@mybricks/render-utils";'
     );
 }
@@ -191,6 +197,7 @@ const compilerHarmonyApp = async (params, config) => {
       if (name === "bus-getUser") {
         busMap["mybricks.core-comlib.bus-getUser"] = {
           title,
+          name: title
         };
       }
     }

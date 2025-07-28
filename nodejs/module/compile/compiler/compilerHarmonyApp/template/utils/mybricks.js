@@ -616,6 +616,12 @@ export const createFx = (fx) => {
   return (value, ...args) => {
     const outputs = {}
 
+    const proxy = new Proxy({}, {
+      get(_, key) {
+        return outputs[key] || (outputs[key] = new Subject())
+      }
+    })
+
     const next = (value) => {
       const res = fx(value, ...args)
       if (res) {
@@ -642,7 +648,7 @@ export const createFx = (fx) => {
       next(value)
     }
 
-    return outputs
+    return proxy
   }
 }
 
@@ -768,38 +774,103 @@ export const createStyles = (params) => {
 let apiRun = null;
 let apiRunVariablesSubject = {};
 
-export const api = (fn) => {
-  return (value, cb = {}) => {
-    const id = Math.random();
-    let isDestroy = false;
+/**
+ * @returns {any}
+ */
+export const transformApi = (api) => {
+  return (value, cb) => {
+    const id = `${Math.random()}_${new Date().getTime()}`
+    const outputs = {}
+    const dispose = () => {
+      
+    }
+    const proxy = new Proxy(dispose, {
+      get(_, key) {
+        return outputs[key] || (outputs[key] = new Subject())
+      }
+    })
+    let isDispose = false;
+
     apiRun = id;
-    fn(value, new Proxy(cb, {
-      get(target, key) {
-        return (value) => {
-          if (value?.subscribe) {
-            value.subscribe((next) => {
-              if (isDestroy) {
-                return
-              }
-              isDestroy = true
-              target[key]?.(next)
-              apiRunVariablesSubject[id]?.forEach((subject) => {
-                subject.destroy()
-              })
-            })
-          } else {
-            if (isDestroy) {
+
+    const res = api(value)
+
+    apiRun = null;
+
+    if (res) {
+      Object.entries(res).forEach(([key, value]) => {
+        if (!outputs[key]) {
+          outputs[key] = new Subject()
+        }
+        if (value?.subscribe) {
+          value.subscribe((value) => {
+            if (isDispose) {
               return
             }
-            isDestroy = true
-            target[key]?.(value)
+            isDispose = true
+            outputs[key].next(value)
+            cb?.[key]?.(value)
             apiRunVariablesSubject[id]?.forEach((subject) => {
               subject.destroy()
             })
+          })
+        } else {
+          if (isDispose) {
+            return
           }
+          isDispose = true
+          outputs[key].next(value)
+          cb?.[key]?.(value)
+          apiRunVariablesSubject[id]?.forEach((subject) => {
+            subject.destroy()
+          })
         }
+      })
+    }
+
+    return proxy
+  }
+}
+
+export const transformBus = (bus) => {
+  return (newBus) => {
+    Object.entries(newBus).forEach(([key, newBus]) => {
+      bus[key] = (value) => {
+        const outputs = {}
+
+        const callBack = new Proxy({}, {
+          get(_, key) {
+            return (value) => {
+              const output = outputs[key] || (outputs[key] = new Subject())
+              output.next(value)
+            }
+          }
+        })
+
+        if (value?.subscribe) {
+          value.subscribe((value) => {
+            newBus(value, callBack)
+          })
+        } else {
+          newBus(value, callBack)
+        }
+
+        return new Proxy({}, {
+          get(_, key) {
+            return outputs[key] || (outputs[key] = new Subject())
+          }
+        })
+      };
+    })
+  }
+}
+
+export const createBus = (bus) => {
+  return () => {
+    return new Proxy({}, {
+      get() {
+        return new Subject()
       }
-    }))
-    apiRun = null;
+    })
   }
 }

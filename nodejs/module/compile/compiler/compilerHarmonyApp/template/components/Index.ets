@@ -1,8 +1,8 @@
-import { appRouter } from "../utils"
-import basicCodes from "./codes";
-import { createJSHandle, createInputsHandle, createEventsHandle, Page, createVariable, createVars, createFx, createSlotsIO, createModuleInputsHandle, createStyles } from "../utils/mybricks"
-import { genCallConnector } from "../utils/CallConnector"
-import { MyBricks } from "../utils/types"
+import { appRouter } from "../../../utils"
+import generateCode from "./codes";
+import { createJSHandle, createInputsHandle, createEventsHandle, Page, createVariable, createVars, createFx, createSlotsIO, createModuleInputsHandle, createStyles } from "../../../utils/mybricks"
+import { genCallConnector } from "../../../utils/CallConnector"
+import { MyBricks } from "../../../utils/types"
 import { globalVars, globalFxs } from "./global"
 $r('app.components.component.import')
 
@@ -87,6 +87,12 @@ class ColumnVisibilityController {
 
 @Builder function Slot(params: MyBricks.SlotParams) {}
 
+interface Context {
+  env?: MyBricks.Env
+  _env?: MyBricks._Env
+}
+
+const context: Context = {}
 const _env: MyBricks._Env = {
   currentScenes: {
     close: () => {
@@ -94,14 +100,16 @@ const _env: MyBricks._Env = {
     }
   }
 }
-
 const vars: ESObject = createVars(globalVars)
-
+const codes: MyBricks.Codes = generateCode({ createJSHandle, context });
 const env: MyBricks.Env = {
-  callConnector: genCallConnector(basicCodes, { domain: undefined }, { globalVars: vars }),
+  callConnector: genCallConnector(codes, { domain: undefined }, { globalVars: vars }),
   appRouter,
   globalVars: vars
 }
+
+context.env = env;
+context._env = _env;
 
 export const Controller = () => {
   return createInputsHandle({}, true) as MyBricks.Controller
@@ -115,14 +123,6 @@ export const ModuleController = () => {
 export const page = new Page(appRouter);
 
 $r('app.components.component.declared')
-
-/** JS计算 */
-const codes: MyBricks.Codes = Object.keys(basicCodes).reduce((pre, key) => {
-  pre[key] = (props: MyBricks.JSParams): MyBricks.JSReturn => {
-    return createJSHandle(basicCodes[key], { props });
-  }
-  return pre
-}, {} as MyBricks.Codes)
 
 export {
   codes,
