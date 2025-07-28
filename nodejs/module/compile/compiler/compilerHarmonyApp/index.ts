@@ -89,10 +89,10 @@ const copyComponents = (params, config) => {
 
   // 拷贝components
   if (download.source === "ohpmLibrary") {
-    fse.copySync(path.join(__dirname, "./template/components/IndexOhpmLibrary.ets"), path.join(targetPath, "components/index.ets"), { overwrite: true })
+    fse.copySync(path.join(__dirname, "./template/components/indexOhpmLibrary.ets"), path.join(targetPath, "components/index.ets"), { overwrite: true })
     fse.writeFileSync(
       path.join(targetPath, "components/index.ets"),
-      (fse.readFileSync(path.join(__dirname, "./template/components/IndexOhpmLibrary.ets"), 'utf-8'))
+      (fse.readFileSync(path.join(__dirname, "./template/components/indexOhpmLibrary.ets"), 'utf-8'))
         .replace(
           "{ domain: undefined }",
           `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
