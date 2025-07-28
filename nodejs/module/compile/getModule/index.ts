@@ -278,22 +278,36 @@ const getModule = async (params) => {
   // const callback = []
   // callback: ${JSON.stringify(callback)}
 
+  const configData: { [key: string]: unknown } = {};
+  const configEditors: {
+    id: string;
+    title: string;
+    type: string;
+    defaultValue?: string;
+    description?: string;
+  }[] = [];
+
   toJson.global.fxFrames.forEach((fxFrame) => {
     if (fxFrame.type === "extension-api") {
       comArayCode += `${calculateJsComponent({tojson: fxFrame, version, origin, module})},`
     }
-    // if (fxFrame.type === "extension") {
-    //   comArayCode += `${calculateJsComponent({tojson: fxFrame, version, origin, module})},`
-    //   fxFrame.outputs.forEach((output) => {
-    //     callback.push({
-    //       id: output.id,
-    //       title: output.title,
-    //       schema: {
-    //         type: "any",
-    //       }
-    //     })
-    //   })
-    // }
+
+    if (fxFrame.type === "extension-config") {
+      fxFrame.inputs.forEach((input) => {
+        const { id, title, type, editor, extValues } = input;
+        if (type === "config") {
+          // 这里应该不需要判断，只能添加配置项
+          configData[id] = extValues?.config?.defaultValue;
+          configEditors.push({
+            id,
+            title: title,
+            type: editor.type,
+            defaultValue: extValues?.config?.defaultValue,
+            description: extValues?.config?.description,
+          });
+        }
+      })
+    }
   })
 
   return {
@@ -306,6 +320,26 @@ const getModule = async (params) => {
     comAray: [${comArayCode}],
     updateTime: "${publishContent.updateTime}",
     author: "${file.creatorName || "-"}",
+    data: ${JSON.stringify(configData)},
+    config: (params) => {
+      console.log("[config params]")
+    },
+    editors: [${configEditors.reduce((pre, cur) => {
+      return pre + `{
+        title: "${cur.title}",
+        type: "${cur.type}",
+        description: "${cur.description || ""}",
+        value: {
+          get(params) {
+            console.log("[get params]", params)
+          },
+          set(params, value) {
+            console.log("[set params]", params)
+            console.log("[set value]", value)
+          }
+        }
+      },`;
+    }, "")}]
   }
 })()`
   }
