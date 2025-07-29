@@ -7,7 +7,7 @@ import { globalVars, globalFxs } from "./global"
 $r('app.components.component.import')
 
 type Style = Record<string, string | number>;
-type Styles = Record<string, Style>;
+export type Styles = Record<string, Style>;
 interface MyBricksComponentBuilderParams {
   uid: string
   controller: MyBricks.Controller
@@ -21,7 +21,7 @@ interface MyBricksComponentBuilderParams {
   parentSlot?: MyBricks.SlotParams
 }
 
-class MyBricksColumnModifier implements AttributeModifier<ColumnAttribute> {
+export class MyBricksColumnModifier implements AttributeModifier<ColumnAttribute> {
   style: Style;
 
   constructor(style: Style) {
@@ -77,7 +77,7 @@ class MyBricksColumnModifier implements AttributeModifier<ColumnAttribute> {
 }
 
 @ObservedV2
-class ColumnVisibilityController {
+export class ColumnVisibilityController {
   @Trace visibility = Visibility.Visible;
 
   setVisibility = (visibility: Visibility) => {

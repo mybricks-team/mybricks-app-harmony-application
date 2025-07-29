@@ -40,6 +40,11 @@ const handleModuleCode = (page, { params, key }) => {
       });
     }
   }
+  page.importManager.addImport({
+    packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+    dependencyNames: ["Styles", "MyBricksColumnModifier", "ColumnVisibilityController"],
+    importType: "named",
+  });
   return `${page.importManager.toCode()}
 
       ${page.content}
