@@ -3,7 +3,7 @@
  * TS => JS :  https://www.typescriptlang.org/play?#code/Q
  * 压缩 JS :  https://jscompress.com/
  */
-const runtime = `function runtimeTemplate({env:u,data:o,inputs:a,outputs:l}){const e=window.React;return e.useMemo(()=>{var e="--replace-tojson--",r="--replace-inputsRelOutputsMap--",t=Object.assign(Object.assign({},baseToJson),{scenes:[e]});let n=!1;return(u.runtime?u.renderModuleComponent:u.renderCom)(t,{env:u,ref:function(i){if(!n){n=!0,o.refs=i;var{config:t}=o;let s=0;e.inputs.forEach(({id:o,type:e})=>{"config"===e?o in t&&i.inputs[o](t[o]):a[o]((e,t)=>{var n,u=++s;0<(null===(n=r[o])||void 0===n?void 0:n.length)?(r[o].forEach(e=>{i.outputs(e+"&execute&"+u,t[e])}),i.inputs[o+"&execute&"+u](e)):i.inputs[o](e)})}),e.outputs.forEach(({id:e})=>{var t;0<(null===(t=r[e])||void 0===t?void 0:t.length)||i.outputs(e,l[e])}),i.run()}},disableAutoRun:!0,moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})},[])}`;
+const runtime = `function runtimeTemplate({env:u,data:o,inputs:l,outputs:d}){const e=window.React;return e.useMemo(()=>{const e=modules["--replace-moduleId--"];var r="--replace-inputsRelOutputsMap--",t=Object.assign(Object.assign({},baseToJson),{scenes:[e]});let n=!1;return(u.runtime?u.renderModuleComponent:u.renderCom)(t,{env:u,ref:function(i){if(!n){n=!0,o.refs=i;var{config:t}=o;let s=0;e.inputs.forEach(({id:o,type:e})=>{"config"===e?o in t&&i.inputs[o](t[o]):l[o]((e,t)=>{var n,u=++s;0<(null===(n=r[o])||void 0===n?void 0:n.length)?(r[o].forEach(e=>{i.outputs(e+"&execute&"+u,t[e])}),i.inputs[o+"&execute&"+u](e)):i.inputs[o](e)})}),e.outputs.forEach(({id:e})=>{var t;0<(null===(t=r[e])||void 0===t?void 0:t.length)||i.outputs(e,d[e])}),i.run()}},disableAutoRun:!0,moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})},[])}`;
 
 const editors = `function editorsTemplate(){return{"@init":function({style:t}){t.width="--replace-init-width--",t.height="--replace-init-height--"},"@resize":{options:["width","height"]},":root":(t,i,e)=>{var n="--origin--";i.title="--replace-title--",i.items=[..."--replace-configs--".map(({id:e,title:t,type:i,defaultValue:n,description:o})=>({title:t,type:i,description:o,value:{get:function({data:t}){return e in t.config?t.config[e]:n},set:function({data:t},i){t.config[e]=i,t.refs&&t.refs.inputs[e](i)}}})),{title:"事件",ifVisible:function(){return"--replace-events-visible--"},items:[..."--replace-events--".map(({id:t,title:i})=>({title:i,type:"_Event",options:()=>({outputId:t})}))]}],n===window.location.origin&&(e.title="高级",e.items=[{title:"打开模块搭建页面",type:"button",ifVisible:function({}){return n===window.location.origin},value:{set:function(){window.open('/mybricks-app-harmony-module/index.html?id="--replace-id--"')}}}])}}}`;
 
@@ -16,6 +16,7 @@ export {
 }
 
 const baseToJson = {};
+const modules = {};
 
 function runtimeTemplate({
   env,
@@ -26,7 +27,7 @@ function runtimeTemplate({
   const React = (window as any).React;
 
   const render = React.useMemo(() => {
-    const mainScene: any = "--replace-tojson--";
+    const mainScene: any = modules["--replace-moduleId--"];
     const inputsRelOutputsMap: any = "--replace-inputsRelOutputsMap--";
     const toJson = {
       ...baseToJson,

@@ -114,7 +114,7 @@ function calculateUiComponent({tojson, version, origin, module, sectionsMap}) {
       .replace('"--replace-id--"', module.id)
       .replace('"--origin--"', `"${origin}"`)})(),
     runtime: ${runtime
-      .replace('"--replace-tojson--"', JSON.stringify(mainScene))
+      .replace('"--replace-moduleId--"', JSON.stringify(mainScene.id))
       .replace('"--replace-moduleId--"', module.id)
       .replace('--replace-moduleVersion--', version)
       .replace('"--replace-inputsRelOutputsMap--"', JSON.stringify(inputsRelOutputsMap))}
@@ -241,30 +241,32 @@ const getModule = async (params) => {
     scenes: [],
     modules: {}
   }
+  const modules = {};
   let comArayCode = "";
   toJson.scenes.forEach((scene) => {
     if (Array.isArray(httpPlugin?.connectors)) {
-    // 模块内的服务接口插件数据
-    Object.entries(scene.coms).forEach(([_, com]: any) => {
-      if (com.def.namespace === "mybricks.harmony._connector") {
-        const comConnector = com.model.data.connector;
-        const httpConnector = httpPlugin.connectors.find((connector) => connector.id === comConnector.id);
+      // 模块内的服务接口插件数据
+      Object.entries(scene.coms).forEach(([_, com]: any) => {
+        if (com.def.namespace === "mybricks.harmony._connector") {
+          const comConnector = com.model.data.connector;
+          const httpConnector = httpPlugin.connectors.find((connector) => connector.id === comConnector.id);
 
-        if (httpConnector) {
-          com.model.data.connector = {
-            ...com.model.data.connector,
-            ...httpConnector,
-            content: {
-              globalParamsFn: httpPlugin.config.paramsFn,
-              globalResultFn: httpPlugin.config.resultFn,
-              globalErrorResultFn: httpPlugin.config.errorResultFn,
+          if (httpConnector) {
+            com.model.data.connector = {
+              ...com.model.data.connector,
+              ...httpConnector,
+              content: {
+                globalParamsFn: httpPlugin.config.paramsFn,
+                globalResultFn: httpPlugin.config.resultFn,
+                globalErrorResultFn: httpPlugin.config.errorResultFn,
+              }
             }
           }
         }
-      }
-    })
-  }
+      })
+    }
     if (scene.type === "module") {
+      modules[scene.id] = scene
       comArayCode += `${calculateUiComponent({tojson: scene, version, origin, module, sectionsMap})},`
     }
     Object.entries(scene.pinProxies).forEach(([_, pinProxy]: any) => {
@@ -313,6 +315,8 @@ const getModule = async (params) => {
   return {
     code: `(() => {
   const baseToJson = ${JSON.stringify(baseToJson)}
+  const modules = ${JSON.stringify(modules)}
+
   window.module_${module.id} = {
     id: ${module.id},
     title: "${module.title}",
@@ -339,7 +343,8 @@ const getModule = async (params) => {
           }
         }
       },`;
-    }, "")}]
+    }, "")}],
+    modules
   }
 })()`
   }
