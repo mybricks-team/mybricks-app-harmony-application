@@ -102,7 +102,7 @@ const _env: MyBricks._Env = {
 }
 const vars: ESObject = createVars(globalVars)
 const codes: MyBricks.Codes = generateCode({ createJSHandle, context });
-const env: MyBricks.Env = {
+const env: MyBricks.Any = {
   callConnector: genCallConnector(codes, { domain: undefined }, { globalVars: vars }),
   appRouter,
   globalVars: vars
