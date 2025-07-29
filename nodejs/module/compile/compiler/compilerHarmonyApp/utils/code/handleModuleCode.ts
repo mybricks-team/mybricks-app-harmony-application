@@ -11,6 +11,13 @@ const handleModuleCode = (page, { params, key }) => {
       importType: "named",
     });
   }
+  if (page.content.includes("join")) {
+    page.importManager.addImport({
+      packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      dependencyNames: ["join"],
+      importType: "named",
+    });
+  }
   if (page.content.includes("Controller()")) {
     page.importManager.addImport({
       packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,

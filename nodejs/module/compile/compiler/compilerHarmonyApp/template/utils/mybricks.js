@@ -874,3 +874,19 @@ export const createBus = (bus) => {
     })
   }
 }
+
+export const join = (lastSubject, nextSubject) => {
+  const next = new Subject();
+
+  if (lastSubject?.subscribe) {
+    lastSubject.subscribe(() => {
+      if (nextSubject?.subscribe) {
+        next.next(nextSubject.value);
+      } else {
+        next.next(nextSubject);
+      }
+    });
+  }
+
+  return next;
+};
