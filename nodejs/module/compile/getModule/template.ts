@@ -141,6 +141,7 @@ function editorsTemplate() {
                   if (id in data.config) {
                     return data.config[id];
                   }
+                  data.config[id] = defaultValue;
                   return defaultValue;
                 },
                 set({ data }: any, value: any) {
