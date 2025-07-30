@@ -876,17 +876,22 @@ export const createBus = (bus) => {
 }
 
 export const join = (lastSubject, nextSubject) => {
-  const next = new Subject();
+  const subject = new Subject();
+  const next = () => {
+    if (nextSubject?.subscribe) {
+      subject.next(nextSubject.value);
+    } else {
+      subject.next(nextSubject);
+    }
+  }
 
   if (lastSubject?.subscribe) {
     lastSubject.subscribe(() => {
-      if (nextSubject?.subscribe) {
-        next.next(nextSubject.value);
-      } else {
-        next.next(nextSubject);
-      }
+      next()
     });
+  } else {
+    next()
   }
 
-  return next;
+  return subject;
 };

@@ -13,7 +13,7 @@ const handleGlobalCode = (page, { params, key }) => {
   }
   if (page.content.includes("join")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: download.source === "sourceCode" ? "../../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["join"],
       importType: "named",
     });

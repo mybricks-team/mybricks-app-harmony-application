@@ -76,9 +76,7 @@ function _execJs (script) {
     };
     try {
       if (runImmediate) {
-        if (env.runtime) {
-          script(runJSParams);
-        }
+        script(runJSParams);
       }
       inputs['input']((val) => {
         try {

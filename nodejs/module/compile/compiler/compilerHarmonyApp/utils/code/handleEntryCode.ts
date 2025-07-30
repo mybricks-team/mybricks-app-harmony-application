@@ -8,9 +8,10 @@ const handleEntryCode = (template: string, {
   tabbarScenes,
   normalScenes,
   entryScene,
-  tabbarConfig
+  tabbarConfig,
+  modulesData
 }) => {
-  const allImports = Array.from(new Set([...tabbarScenes, ...normalScenes]))
+  let allImports = Array.from(new Set([...tabbarScenes, ...normalScenes]))
     .map(scene => `// ${scene.title} \nimport ${scene.pageName} from '../${scene.path}';`)
     .join('\n')
   const generateRoutes = (scenes) => scenes
@@ -18,6 +19,17 @@ const handleEntryCode = (template: string, {
     .join('\n');
   const renderMainScenes = generateRoutes(Array.from(new Set([entryScene, ...tabbarScenes])))
   const renderScenes = generateRoutes(normalScenes)
+
+  let executConfigs = "";
+
+  Object.entries(modulesData).forEach(([, { title, moduleName, configs }]: any) => {
+    allImports += `/** ${title} 配置 */\n` + 
+    `import { config as ${moduleName}Config } from '../modules/${moduleName}/api';\n`
+
+    executConfigs += `${moduleName}Config(${JSON.stringify(configs)});\n`
+  })
+
+  allImports += `\n${executConfigs}`;
 
   return template
     .replace("$r('app.config.imports')", allImports)

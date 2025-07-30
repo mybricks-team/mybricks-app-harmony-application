@@ -3,14 +3,9 @@ import generateFileName from "./generateFileName"
 import { firstCharToLowerCase } from "./string"
 
 const getModules = async (installedModules) => {
-  // const harmonyModule = await API.Material.getMaterialContent({ namespace: `mybricks.harmony.module.${moduleId}` })
-  // const { publishId } = harmonyModule.content
-  // const publishContent = await API.File.getPublishContent({ pubId: publishId })
-  // const module = publishContent.content
-
   const modulesData = {};
 
-  await Promise.all(installedModules.map(async ({ id: moduleId }) => {
+  await Promise.all(installedModules.map(async ({ id: moduleId, data }) => {
     const harmonyModule = await API.Material.getMaterialContent({ namespace: `mybricks.harmony.module.${moduleId}` })
     const { publishId } = harmonyModule.content
     const publishContent = await API.File.getPublishContent({ pubId: publishId })
@@ -24,10 +19,28 @@ const getModules = async (installedModules) => {
       }
     })
 
+    const extensionConfigFrame = module.data.toJson.global.fxFrames.find((frame) => {
+      return frame.type === "extension-config";
+    })
+
+    const configs = {};
+
+    if (extensionConfigFrame) {
+       extensionConfigFrame.inputs.forEach((input) => {
+        const { id, title, type, editor, extValues } = input;
+        if (id in data) {
+          configs[id] = data[id]
+        } else {
+          configs[id] = extValues?.config?.defaultValue
+        }
+      })
+    }
+
     modulesData[moduleId] = {
       ...module,
       moduleName: firstCharToLowerCase(generateFileName(module.title)),
-      sceneIdToName
+      sceneIdToName,
+      configs
     }
   }))
 

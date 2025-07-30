@@ -250,7 +250,7 @@ const compilerHarmonyApp = async (params, config) => {
 
       if (page.type === "extension-config") {
         // 配置
-        apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.config')", `(${page.meta.inputs?.length ? "value: MyBricks.Any" : ""}) => {
+        apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.config')", `(value: MyBricks.Any) => {
           ${page.content}
         }`);
         return
@@ -397,7 +397,8 @@ const compilerHarmonyApp = async (params, config) => {
     normalScenes,
     tabbarScenes,
     tabbarConfig,
-    entryScene
+    entryScene,
+    modulesData
   })
   fse.writeFileSync(entryPath, entryFileContent, 'utf-8')
 }

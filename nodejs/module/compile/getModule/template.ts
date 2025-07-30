@@ -3,11 +3,11 @@
  * TS => JS :  https://www.typescriptlang.org/play?#code/Q
  * 压缩 JS :  https://jscompress.com/
  */
-const runtime = `function runtimeTemplate({env:u,data:o,inputs:l,outputs:d}){const e=window.React;return e.useMemo(()=>{const e=modules["--replace-moduleId--"];var r="--replace-inputsRelOutputsMap--",t=Object.assign(Object.assign({},baseToJson),{scenes:[e]});let n=!1;return(u.runtime?u.renderModuleComponent:u.renderCom)(t,{env:u,ref:function(i){if(!n){n=!0,o.refs=i;var{config:t}=o;let s=0;e.inputs.forEach(({id:o,type:e})=>{"config"===e?o in t&&i.inputs[o](t[o]):l[o]((e,t)=>{var n,u=++s;0<(null===(n=r[o])||void 0===n?void 0:n.length)?(r[o].forEach(e=>{i.outputs(e+"&execute&"+u,t[e])}),i.inputs[o+"&execute&"+u](e)):i.inputs[o](e)})}),e.outputs.forEach(({id:e})=>{var t;0<(null===(t=r[e])||void 0===t?void 0:t.length)||i.outputs(e,d[e])}),i.run()}},disableAutoRun:!0,moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})},[])}`;
+const runtime = `function runtimeTemplate({env:o,data:a,inputs:s,outputs:i}){const e=window.React,[u,t]=e.useState(1);return e.useEffect(()=>{var e=()=>{t(e=>e+1)};return reRenderSet.add(e),()=>{reRenderSet.delete(e)}},[]),e.useMemo(()=>{const e=modules["--replace-moduleId--"];var l="--replace-inputsRelOutputsMap--",t=Object.assign(Object.assign({},baseToJson),{scenes:[e]});let n=!1;return(o.runtime?o.renderModuleComponent:o.renderCom)(t,{env:Object.assign({},o),extend:{env:{scenesOperate:{var:globalVariables,getGlobalComProps:function(e){return{data:{val:globalVariables.getValueById(e)}}},exeGlobalCom:function({com:e,value:t}){globalVariables.changed({com:e,value:t})}}}},ref:function(r){if(!n){n=!0,a.refs=r;var{config:t}=a;let u=0;e.inputs.forEach(({id:a,type:e})=>{"config"===e?a in t&&r.inputs[a](t[a]):s[a]((e,t)=>{var n,o=++u;0<(null===(n=l[a])||void 0===n?void 0:n.length)?(l[a].forEach(e=>{r.outputs(e+"&execute&"+o,t[e])}),r.inputs[a+"&execute&"+o](e)):r.inputs[a](e)})}),e.outputs.forEach(({id:e})=>{var t;0<(null===(t=l[e])||void 0===t?void 0:t.length)||r.outputs(e,i[e])}),r.run()}},disableAutoRun:!0,moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--",reRenderKey:u})},[u])}`;
 
 const editors = `function editorsTemplate(){return{"@init":function({style:t}){t.width="--replace-init-width--",t.height="--replace-init-height--"},"@resize":{options:["width","height"]},":root":(t,i,e)=>{var n="--origin--";i.title="--replace-title--",i.items=[..."--replace-configs--".map(({id:e,title:t,type:i,defaultValue:n,description:o})=>({title:t,type:i,description:o,value:{get:function({data:t}){return e in t.config?t.config[e]:n},set:function({data:t},i){t.config[e]=i,t.refs&&t.refs.inputs[e](i)}}})),{title:"事件",ifVisible:function(){return"--replace-events-visible--"},items:[..."--replace-events--".map(({id:t,title:i})=>({title:i,type:"_Event",options:()=>({outputId:t})}))]}],n===window.location.origin&&(e.title="高级",e.items=[{title:"打开模块搭建页面",type:"button",ifVisible:function({}){return n===window.location.origin},value:{set:function(){window.open('/mybricks-app-harmony-module/index.html?id="--replace-id--"')}}}])}}}`;
 
-const runtimeJs = `function runtimeTemplateJs({title:e,env:s,data:t,inputs:r,outputs:u}){var i="--replace-tojson--",n=Object.assign(Object.assign({},baseToJson),{scenes:[i]});s.renderModuleJs(n,{env:s,ref:function(n){var o;t.refs||(t.refs=n,{config:o}=t,n?(i.inputs.forEach(({id:s,type:e})=>{"config"===e?s in o&&n.inputs[s](o[s]):r[s](e=>{n.inputs[s](e)})}),i.outputs.forEach(({id:e})=>{n.outputs(e,u[e])}),n.run()):console.error("计算组件["+e+"]refs为空"))},moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})}`
+const runtimeJs = `function runtimeTemplateJs({title:e,env:o,data:s,inputs:t,outputs:r}){var l="--replace-tojson--",a=Object.assign(Object.assign({},baseToJson),{scenes:[l]});o.renderModuleJs(a,{env:Object.assign({},o),extend:{env:{scenesOperate:{var:globalVariables,getGlobalComProps:function(e){return{data:{val:globalVariables.getValueById(e)}}},exeGlobalCom:function({com:e,value:o}){globalVariables.changed({com:e,value:o})}}}},ref:function(a){var n;s.refs||(s.refs=a,{config:n}=s,a?(l.inputs.forEach(({id:o,type:e})=>{"config"===e?o in n&&a.inputs[o](n[o]):t[o](e=>{a.inputs[o](e)})}),l.outputs.forEach(({id:e})=>{a.outputs(e,r[e])}),a.run()):console.error("计算组件["+e+"]refs为空"))},moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})}`
 
 export {
   runtime,
@@ -17,6 +17,8 @@ export {
 
 const baseToJson = {};
 const modules = {};
+const globalVariables = {};
+const reRenderSet = new Set();
 
 function runtimeTemplate({
   env,
@@ -25,6 +27,19 @@ function runtimeTemplate({
   outputs: propsOutputs,
 }) {
   const React = (window as any).React;
+  const [key, setKey] = React.useState(1);
+
+  React.useEffect(() => {
+    const reRender = () => {
+      setKey((key) => {
+        return key + 1
+      })
+    }
+    reRenderSet.add(reRender);
+    return () => {
+      reRenderSet.delete(reRender);
+    }
+  }, [])
 
   const render = React.useMemo(() => {
     const mainScene: any = modules["--replace-moduleId--"];
@@ -36,7 +51,26 @@ function runtimeTemplate({
     let flag = false;
 
     return (env.runtime ? env.renderModuleComponent : env.renderCom)(toJson, {
-      env,
+      env: {
+        ...env,
+      },
+      extend: {
+        env: {
+          scenesOperate: {
+            var: globalVariables,
+            getGlobalComProps(comId) {
+              return {
+                data: {
+                  val: globalVariables.getValueById(comId)
+                }
+              }
+            },
+            exeGlobalCom({ com, value }) {
+              globalVariables.changed({ com, value });
+            },
+          },
+        }
+      },
       ref(refs) {
         // 多场景会执行多次 ref，但实际只需执行一次
         if (flag) return;
@@ -75,8 +109,9 @@ function runtimeTemplate({
       disableAutoRun: true,
       moduleId: "--replace-moduleId--",
       moduleVersion: "--replace-moduleVersion--",
+      reRenderKey: key
     });
-  }, []);
+  }, [key]);
 
   return render;
 }
@@ -179,7 +214,26 @@ function runtimeTemplateJs({
   }
 
   env.renderModuleJs(toJson, {
-    env,
+    env: {
+      ...env,
+    },
+    extend: {
+      env: {
+        scenesOperate: {
+          var: globalVariables,
+          getGlobalComProps(comId) {
+            return {
+              data: {
+                val: globalVariables.getValueById(comId)
+              }
+            }
+          },
+          exeGlobalCom({ com, value }) {
+            globalVariables.changed({ com, value });
+          },
+        },
+      }
+    },
     ref(refs: any) {
       // 多场景会执行多次
       if (data.refs) return;

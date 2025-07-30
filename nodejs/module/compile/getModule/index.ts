@@ -242,6 +242,7 @@ const getModule = async (params) => {
     modules: {}
   }
   const modules = {};
+  let configFx = {};
   let comArayCode = "";
   toJson.scenes.forEach((scene) => {
     if (Array.isArray(httpPlugin?.connectors)) {
@@ -309,6 +310,7 @@ const getModule = async (params) => {
           });
         }
       })
+      configFx = fxFrame
     }
   })
 
@@ -316,6 +318,67 @@ const getModule = async (params) => {
     code: `(() => {
   const baseToJson = ${JSON.stringify(baseToJson)}
   const modules = ${JSON.stringify(modules)}
+  const configFx = ${JSON.stringify(configFx)}
+  const reRenderSet = new Set()
+  class Var {
+    _varChangeCallBack = new Map();
+    _valuesTitleMap = new Map();
+    _valuesIdMap = new Map();
+
+    regist(id, cb) {
+      let callBack = this._varChangeCallBack.get(id);
+      if (!callBack) {
+        callBack = new Set();
+        this._varChangeCallBack.set(id, callBack);
+      }
+      callBack.add(cb);
+    }
+
+    destroy(id, cb) {
+      const callBack = this._varChangeCallBack.get(id);
+      if (callBack) {
+        callBack.delete(cb);
+      }
+    }
+
+    changed(params) {
+      const { com, value } = params;
+      const id = com.id;
+      this._valuesTitleMap.set(com.title, value);
+      this._valuesIdMap.set(id, value);
+      const callBack = this._varChangeCallBack.get(id);
+      if (callBack) {
+        callBack.forEach((cb) => {
+          cb(value);
+        });
+      }
+    }
+
+    getValueByTitle(title) {
+      return this._valuesTitleMap.get(title);
+    }
+
+    getValueById(id) {
+      return this._valuesIdMap.get(id);
+    }
+
+    clone() {
+      const { _valuesTitleMap, _valuesIdMap } = this;
+      const clone = new Var();
+
+      clone._valuesIdMap = new Map(_valuesIdMap);
+      clone._valuesTitleMap = new Map(_valuesTitleMap);
+
+      return clone;
+    }
+  }
+
+
+  const globalVariables = new Var();
+
+  const defaultData = ${JSON.stringify(configData)};
+
+  let env;
 
   window.module_${module.id} = {
     id: ${module.id},
@@ -324,9 +387,39 @@ const getModule = async (params) => {
     comAray: [${comArayCode}],
     updateTime: "${publishContent.updateTime}",
     author: "${file.creatorName || "-"}",
-    data: ${JSON.stringify(configData)},
+    data: defaultData,
     config: (params) => {
-      console.log("[config params]")
+      env = params.env;
+      Object.entries(defaultData).forEach(([key, value]) => {
+        if (!(key in params.data)) {
+          params.data[key] = value;
+        }
+      })
+      
+      const data = params.data;
+
+      params.env.renderModule(configFx, {
+        ref(_refs) {
+          configFx.inputs.forEach(({ id }) => {
+            _refs.inputs[id](data[id]);
+          })
+        },
+        env: {
+          scenesOperate: {
+            getGlobalComProps(comId) {
+              return {
+                data: {
+                  val: globalVariables.getValueById(comId)
+                }
+              }
+            },
+            exeGlobalCom({ com, value }) {
+              globalVariables.changed({ com, value });
+            },
+            var: globalVariables
+          }
+        }
+      })
     },
     editors: [${configEditors.reduce((pre, cur) => {
       return pre + `{
@@ -335,11 +428,39 @@ const getModule = async (params) => {
         description: "${cur.description || ""}",
         value: {
           get(params) {
-            console.log("[get params]", params)
+            return params.data["${cur.id}"]
           },
           set(params, value) {
-            console.log("[set params]", params)
-            console.log("[set value]", value)
+            params.data["${cur.id}"] = value
+
+            const data = params.data;
+
+            env.renderModule(configFx, {
+              ref(_refs) {
+                configFx.inputs.forEach(({ id }) => {
+                  _refs.inputs[id](data[id]);
+                })
+              },
+              env: {
+                scenesOperate: {
+                  getGlobalComProps(comId) {
+                    return {
+                      data: {
+                        val: globalVariables.getValueById(comId)
+                      }
+                    }
+                  },
+                  exeGlobalCom({ com, value }) {
+                    globalVariables.changed({ com, value });
+                  },
+                  var: globalVariables
+                }
+              }
+            })
+
+            reRenderSet.forEach((reRender) => {
+              reRender()
+            })
           }
         }
       },`;
