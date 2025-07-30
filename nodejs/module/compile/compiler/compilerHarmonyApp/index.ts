@@ -140,11 +140,12 @@ const handleApiCode = (params, config) => {
   const { data } = params;
   const { download } = data;
   const { code } = config;
+  const hasBus = code.includes("bus.")
   return code
     .replace("$r('app.api.import.utils')",
       download.source === "sourceCode" ?
-        'import { MyBricks } from "../../utils/types";\nimport { transformApi } from "../../utils/mybricks"\n;' :
-        'import { MyBricks, transformApi } from "@mybricks/render-utils";'
+        `import { MyBricks } from "../../utils/types";\nimport { transformApi } from "../../utils/mybricks"\n;${hasBus ? 'import { bus } from "../app/bus";' : ""}` :
+        `import { MyBricks, transformApi } from "@mybricks/render-utils";${hasBus ? '\nimport { bus } from "../app/bus";' : ""}`
     );
 }
 
