@@ -387,25 +387,9 @@ const getModule = async (params) => {
 
   let env;
 
-  window.module_${module.id} = {
-    id: ${module.id},
-    title: "${module.title}",
-    version: "${harmonyModule.version}",
-    comAray: [${comArayCode}],
-    updateTime: "${publishContent.updateTime}",
-    author: "${file.creatorName || "-"}",
-    data: defaultData,
-    config: (params) => {
-      env = params.env;
-      Object.entries(defaultData).forEach(([key, value]) => {
-        if (!(key in params.data)) {
-          params.data[key] = value;
-        }
-      })
-      
-      const data = params.data;
-
-      params.env.renderModule(configFx, {
+  const excuteConfig = (params) => {
+    const { env, data } = params;
+    env.renderModule(configFx, {
         ref(_refs) {
           configFx.inputs.forEach(({ id }) => {
             _refs.inputs[id](data[id]);
@@ -427,6 +411,25 @@ const getModule = async (params) => {
           }
         }
       })
+  }
+
+  window.module_${module.id} = {
+    id: ${module.id},
+    title: "${module.title}",
+    version: "${harmonyModule.version}",
+    comAray: [${comArayCode}],
+    updateTime: "${publishContent.updateTime}",
+    author: "${file.creatorName || "-"}",
+    data: defaultData,
+    config: (params) => {
+      env = params.env;
+      Object.entries(defaultData).forEach(([key, value]) => {
+        if (!(key in params.data)) {
+          params.data[key] = value;
+        }
+      })
+
+      excuteConfig({ env, data: params.data });
     },
     editors: [${configEditors.reduce((pre, cur) => {
       return pre + `{
@@ -440,30 +443,7 @@ const getModule = async (params) => {
           set(params, value) {
             params.data["${cur.id}"] = value
 
-            const data = params.data;
-
-            env.renderModule(configFx, {
-              ref(_refs) {
-                configFx.inputs.forEach(({ id }) => {
-                  _refs.inputs[id](data[id]);
-                })
-              },
-              env: {
-                scenesOperate: {
-                  getGlobalComProps(comId) {
-                    return {
-                      data: {
-                        val: globalVariables.getValueById(comId)
-                      }
-                    }
-                  },
-                  exeGlobalCom({ com, value }) {
-                    globalVariables.changed({ com, value });
-                  },
-                  var: globalVariables
-                }
-              }
-            })
+            excuteConfig({ env, data: params.data });
 
             reRenderSet.forEach((reRender) => {
               reRender()
