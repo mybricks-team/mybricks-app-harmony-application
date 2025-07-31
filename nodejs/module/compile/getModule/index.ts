@@ -238,6 +238,13 @@ const getModule = async (params) => {
 
   const baseToJson = {
     ...toJson,
+    global: {
+      ...toJson.global,
+      fxFrames: toJson.global.fxFrames.filter((fxFrame) => {
+        return fxFrame.type !== "extension-config"
+      })
+    },
+    frames: [],
     scenes: [],
     modules: {}
   }
