@@ -9,7 +9,8 @@ const handleEntryCode = (template: string, {
   normalScenes,
   entryScene,
   tabbarConfig,
-  modulesData
+  modulesData,
+  usedModuleNames
 }) => {
   let allImports = Array.from(new Set([...tabbarScenes, ...normalScenes]))
     .map(scene => `// ${scene.title} \nimport ${scene.pageName} from '../${scene.path}';`)
@@ -23,13 +24,18 @@ const handleEntryCode = (template: string, {
   let executConfigs = "";
 
   Object.entries(modulesData).forEach(([, { title, moduleName, configs }]: any) => {
-    allImports += `/** ${title} 配置 */\n` + 
-    `import { config as ${moduleName}Config } from '../modules/${moduleName}/api';\n`
 
-    executConfigs += `${moduleName}Config(${JSON.stringify(configs)});\n`
+    if (usedModuleNames.has(moduleName)) {
+      allImports += `\n/** ${title} 配置 */\n` + 
+      `import { config as ${moduleName}Config } from '../modules/${moduleName}/api';`
+
+      executConfigs += `${moduleName}Config(${JSON.stringify(configs)});\n`
+    }
   })
 
-  allImports += `\n${executConfigs}`;
+  if (executConfigs) {
+    allImports += `\n\n${executConfigs}`;
+  }
 
   return template
     .replace("$r('app.config.imports')", allImports)

@@ -226,8 +226,11 @@ const compilerHarmonyApp = async (params, config) => {
     useLog
   }, modulesData)
 
+  const usedModuleNames = new Set();
+
   Object.entries(pageCode).forEach(([key, value]: any) => {
     const { pageCode, moduleName, usedComponentsMap, data } = value;
+    usedModuleNames.add(moduleName);
     const moduleNames = new Set<string>();
     let apiCode = fse.readFileSync(path.join(__dirname, "./template/api.ets"), "utf-8");
 
@@ -399,7 +402,8 @@ const compilerHarmonyApp = async (params, config) => {
     tabbarScenes,
     tabbarConfig,
     entryScene,
-    modulesData
+    modulesData,
+    usedModuleNames
   })
   fse.writeFileSync(entryPath, entryFileContent, 'utf-8')
 }
