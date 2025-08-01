@@ -1,6 +1,6 @@
 
 import { checkValueType, getValidSlotStyle, getValidSizeValue, transformToValidBackground, transformToValidStyleAry, fixCompileErrorStyle, uuid } from './helper'
-export { getDSLPrompts, getSystemPrompts } from './prompt'
+export { getDSLPrompts, getSystemPrompts, getExamplePromptsAtFirst } from './prompt'
 
 /**
  * @description Json遍历器，支持对不同类型的节点注册修改函数
@@ -183,17 +183,64 @@ traversal.registerModifier('slot', (slot) => {
   if (!slot.style) {
     slot.style = {}
   }
-  slot.style = {
-    ...slot.style,
-    layout: slot.style?.flexDirection === 'row' ? 'flex-row' : 'flex-column',
-    flexDirection: slot.style?.flexDirection === 'row' ? 'row' : 'column',
-    width: slot.style?.width,
-    height: slot.style?.height
+  if (slot.style.layout === "smart") {
+    slot.style = {
+      ...slot.style,
+      layout: "smart",
+      width: slot.style?.width,
+      height: slot.style?.height
+    }
+  } else {
+    slot.style = {
+      ...slot.style,
+      layout: slot.style?.flexDirection === 'row' ? 'flex-row' : 'flex-column',
+      flexDirection: slot.style?.flexDirection === 'row' ? 'row' : 'column',
+      width: slot.style?.width,
+      height: slot.style?.height
+    }
   }
 })
 
 // 添加对所有组件的样式兼容
 traversal.registerModifier('component:before', (component) => {
+  if (component.namespace === 'group') {
+    // 幻觉处理，没有配置display的情况
+    if (!component?.style?.display) {
+      // 判断comAry的component.style是不是全部都是绝对定位，是则设置 component?.style?.display = 'relative'
+      if (Array.isArray(component.comAry) && component.comAry.every(comp => {
+        const style = comp?.style || {};
+        const pairs = [
+          ['left', 'top'],
+          ['left', 'right'],
+          ['left', 'bottom'],
+          ['top', 'right'],
+          ['top', 'bottom'],
+          ['right', 'bottom']
+        ];
+        return pairs.some(([prop1, prop2]) => 
+          typeof style[prop1] !== 'undefined' && 
+          typeof style[prop2] !== 'undefined'
+        );
+      })) {
+        delete component.style.display
+      } else {
+        component.namespace = 'flex'
+        component.style.flexDirection = 'column'
+        delete component.style.display
+      }
+    } else if (component.style.display === 'relative') {
+      delete component.style.display
+    } else if (component.style.display === 'column') {
+      delete component.style.display
+      component.namespace = 'flex'
+      component.style.flexDirection = 'column'
+    } else if (component.style.display === 'row') {
+      delete component.style.display
+      component.namespace = 'flex'
+      component.style.flexDirection = 'row'
+    }
+  }
+
   fixCompileErrorStyle(component.style ?? {})
   polyfillWhenComponentUseFlex(component)
   transformToValidStyleAry(component?.style?.styleAry)
@@ -207,6 +254,38 @@ traversal.registerModifier('component:after', (component) => {
 
 // 添加对flex节点的处理
 traversal.registerModifier('flex', (component) => {
+  if (component.style?.smart) {
+    component.namespace = 'mybricks.harmony.containerBasic'
+    if (!component.data) {
+      component.data = {}
+    }
+
+    // 转换成containerBasic的类名
+    if (component.style?.styleAry) {
+      component.style?.styleAry.forEach(s => {
+        if (s.selector === ':root') {
+          s.selector = '> .mybricks-container'
+        }
+      })
+    }
+
+    // component.data.layout = 'smart'
+    component.slots = {
+      content: {
+        id: 'content',
+        title: component.title ? `${component.title}插槽` : '内容',
+        style: {
+          width: '100%',
+          height: '100%',
+          layout: `smart`,
+        },
+        comAry: component?.comAry
+      }
+    }
+    component.comAry = undefined
+    return
+  }
+
 
   // 兼容把样式写到 layout 的情况
   if (component.style) {
@@ -276,7 +355,7 @@ traversal.registerModifier('flex', (component) => {
 
   // 处理绝对定位兼容
   const rootStyle = component?.style?.styleAry?.find?.(s => s.selector === ':root')?.css
-  if (rootStyle?.position === 'absolute') {
+  if (rootStyle?.position === 'relative') {
     component.style.position = rootStyle.position;
 
     if (rootStyle.left) {
@@ -506,10 +585,47 @@ traversal.registerModifier('flex', (component) => {
   }
 })
 
+traversal.registerModifier('group', (component) => {
+  component.namespace = 'mybricks.harmony.containerBasic'
+  if (!component.data) {
+    component.data = {}
+  }
+
+  // 转换成containerBasic的类名
+  if (component.style?.styleAry) {
+    component.style?.styleAry.forEach(s => {
+      if (s.selector === ':root') {
+        s.selector = '> .mybricks-container'
+      }
+    })
+  }
+
+  // component.data.layout = 'smart'
+  component.slots = {
+    content: {
+      id: 'content',
+      title: component.title ? `${component.title}插槽` : '内容',
+      style: {
+        width: '100%',
+        height: '100%',
+        layout: `smart`,
+      },
+      comAry: component?.comAry
+    }
+  }
+  component.comAry = undefined
+  // delete component.comAry
+})
+
 // 添加对根结点的处理
 traversal.registerModifier('system.page', (component) => {
+  console.log("[system.page]", window._.clone(component))
   component.namespace = 'mybricks.harmony.systemPage'
-  component.data = {
+  component.data = component.slots?.content?.style?.layout === "smart" ? {
+    layout: {
+      position: "smart"
+    }
+  } : {
     layout: getValidSlotStyle(component.style)
   }
 
@@ -595,19 +711,19 @@ export const getNewDSL = (type, dslJson) => {
 export const getExamplePrompts = () => {
   return `
   <example>
-    <user_query>搭建两个竖排的按钮，按钮宽度固定 + 铺满</user_query>
+    <user_query>搭建两个竖排水平居中的按钮，按钮宽度固定 + 铺满</user_query>
     <assistant_response>
     \`\`\`dsl file="page.dsl"
       <page title="测试页面">
         <system.page title="你好世界" styleAry={[{selector:":root",css:{background:"#FFFFFF"}}]}>
           <slots.content title="页面内容" layout={{ alignItems: 'center' }}>
-            <mybricks.harmony.button 
-              title="按钮1" 
+            <mybricks.harmony.button
+              title="按钮1"
               layout={{width: 50, height: 36}}
               styleAry={[{selector:".mybricks-button",css:{"backgroundColor":"red"}}]}
               data={{text:"按钮1"}}/>
-            <mybricks.harmony.button 
-              title="按钮2" 
+            <mybricks.harmony.button
+              title="按钮2"
               layout={{width: '100%', height: 36}}
               styleAry={[{selector:".mybricks-button",css:{"backgroundColor":"blue"}}]}
               data={{text:"按钮2"}}/>
@@ -616,6 +732,81 @@ export const getExamplePrompts = () => {
       </page>
     \`\`\`
     </assistant_response>
+
+    <user_query>搭建一个详情卡片</user_query>
+    <assistant_response>
+    卡片内容为了优化搭建一般使用绝对定位布局，需要实现一个外边距12 + 内边距12的卡片。
+    \`\`\`dsl file="page.dsl"
+      <page title="详情卡片页面">
+        <system.page title="详情卡片" styleAry={[{selector:":root",css:{background:"#FFFFFF"}}]}>
+          <slots.content title="内容" layout={{ alignItems: 'center' }}>
+            <group title="卡片" layout={{display: 'relative', width: '100%', height: 70, marginLeft: 12, marginRight: 12 }} styleAry={[{ selector: ':root', css: { backgroundColor: '#eeeeee' } }]}>
+              <mybricks.harmony.text title="居上大标题" layout={{ width: 'fit-content', top: 12, left: 12 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'20px',lineHeight:'20px',fontWeight: 500}}]} data={{text:"Hello world"}} />
+              <mybricks.harmony.text title="居左小标题" layout={{ width: 26, top: 26, left: 12 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'13px'}}]} data={{text:"标题"}} />
+              <mybricks.harmony.text title="居右占满剩余宽度" layout={{ width: 301, widthFull: true, top: 26, right: 12 }} styleAry={[{selector:".mybricks-text",css:{color:'#999999',fontSize:'12px'}}]} data={{text:"内容信息"}} />
+            </group>
+          </slots.content>
+        </system.page>
+      </page>
+    \`\`\`
+    </assistant_response>
+    <attention>
+      页面插槽中为流式布局，所以使用width=100% + margin来配置卡片；
+
+      卡片内为绝对定位，绝对定位的计算思路如下：
+      1. 内边距通过绝对定位布局配置内容的尺寸和位置决定；
+      2. 卡片高度 = 12*2（上下间距） + 20（标题行高）+ 10（小标题和标题的间距）+ 16（文本的默认行高，取这一行文本中最高值） = 70；
+      3. 大标题的top = 12（卡片内间距）；
+      4. 小标题的top = 12（标题的top）+ 20（标题的行高）+ 10（与标题间距）= 42；
+      5. 小标题（居左对齐）的宽度 = 内容长度*fontSize = 26 # 这里建议根据经验值来计算；
+      6. 占满剩余宽度（居右对齐）的宽度 = 351（卡片宽度） - 12*2（左右间距） - 26（小标题的宽度）。
+
+      绝对定位的标记也要记得添加：
+      - 居右占满剩余宽度的内容添加 widthFull 标记；
+    </attention>
+
+    <user_query>搭建一个天气页面</user_query>
+    <assistant_response>
+    天气界面从上到下包含「位置展示」「天气信息区域」「七日天气列表」「固定公告」四个模块。我们用flex布局 + 绝对定位布局的混合使用来搭建此页面。
+    \`\`\`dsl file="page.dsl"
+      <page title="天气页面">
+        <system.page title="天气" styleAry={[{selector:":root",css:{background:"#FFFFFF"}}]}>
+          <slots.content title="内容" layout={{ alignItems: 'flex-start' }}>
+            <mybricks.harmony.text title="位置展示" layout={{ width: '100%', marginLeft: 12, marginRight: 12 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'16px',lineHeight:'16px',fontWeight: 500}}]} data={{text:"杭州市余杭区"}} />
+            <group title="天气信息" layout={{display: 'relative', width: '100%', height: 200, marginTop: 12, marginLeft: 12, marginRight: 12}}>
+              <mybricks.harmony.text title="温度大标题" layout={{ width: 'fit-content', top: 12, left: 0 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'46px',lineHeight:'46px',fontWeight: 500}}]} data={{text:"33度"}} />
+              <mybricks.harmony.text title="天气" layout={{ width: 'fit-content', top: 70, left: 0 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'13px'}}]} data={{text:"阴 最高33度 最低25度"}} />
+            </group>
+            <group title="最近七日天气" layout={{display: 'column', width: '100%', height: 'fit-content', marginTop: 12, marginLeft: 12, marginRight: 12 }} styleAry={[{selector:":root",css:{backgroundColor:"#F0F0F0", borderRadius: 24}}]}>
+              <mybricks.harmony.containerWaterfall title="天气列表" layout={{ width: '100%', height: 'fit-content' }}>
+                <slots.item title="天气项">
+                  <group title="天气信息" layout={{display: 'relative', width: '100%', height: 44, marginLeft: 12, marginRight: 12}}>
+                    <mybricks.harmony.text title="天气" layout={{ width: 'fit-content', top: 15, left: 0 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'14px', ellipsis: true, maxLines: 1}}]} data={{text:"周一 阴"}} />
+                  </group>
+                </slots.item>
+              </mybricks.harmony.containerWaterfall>
+            </group>
+            <group title="固定公告" layout={{display: 'relative', position: 'fixed', width: '100%', height: 32, left: 0, bottom: 0}}>
+              <mybricks.harmony.text title="公告内容" layout={{ width: 'fit-content', top: 6, left: 0 }} styleAry={[{selector:".mybricks-text",css:{fontSize:'20px', textAlign: 'center'}}]} data={{text:"注意雷雨大风天气"}} />
+            </group>
+          </slots.content>
+        </system.page>
+      </page>
+    \`\`\`
+    </assistant_response>
+    <attention>
+      页面插槽中为流式布局，直接使用 flex-start 居左对齐即可
+      - 「位置展示」只是一个文本，使用文本组件设置走有间距，也方便内容动态增长；
+      - 「天气信息区域」为复合的内容展示，计算内部的高度，使用绝对定位搭建内容；
+        - 天气可能是动态的，但是高度只够一行文本，所以配置了省略相关信息；
+      - 「七日天气列表」为不确定高度的动态列表；
+        - 首先使用fit-content的flex布局嵌套瀑布流组件，保证动态高度（瀑布流卡片有高度），同时提供一个圆角和背景的样式支持；
+        - 其次内部卡片为复合的内容展示，使用绝对定位；
+          - 内部卡片中的公告内容判断为动态内容，所以width配置fit-content；
+      - 「固定公告」是固定定位，使用left和bottom居下定位，使用width=100%紧贴视口，同时文本垂直居中；
+      
+      > 特别注意，fixed定位只能放置在system.page的slots.content中；
+    </attention>
   </example>
   `
 }
