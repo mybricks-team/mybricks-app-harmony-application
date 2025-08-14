@@ -194,7 +194,7 @@ function calculateJsComponent({ tojson, version, origin, module }) {
   // [TODO] version
   return `{
     namespace: "mybricks.harmony.module.${module.id}.${tojson.id}",
-    version: "0.0.1",
+    version: "${version}",
     title: "${mainScene.title}",
     description: "${mainScene.title}",
     rtType: "js",
@@ -215,7 +215,16 @@ function calculateJsComponent({ tojson, version, origin, module }) {
     runtime: ${runtimeJs
       .replace('"--replace-tojson--"', JSON.stringify(mainScene))
       .replace('"--replace-moduleId--"', module.id)
-      .replace('--replace-moduleVersion--', version)}
+      .replace('--replace-moduleVersion--', version)},
+    upgrade: ${upgrade
+      .replace(`"__inputs__"`, JSON.stringify(inputs))
+      .replace(`"__outputs__"`, JSON.stringify(mainScene.outputs))
+      .replace(
+        `"__data__"`,
+        JSON.stringify({
+          config,
+        })
+      )}
     }`
 }
 
@@ -284,7 +293,7 @@ const getModule = async (params) => {
     }
     if (scene.type === "module") {
       modules[scene.id] = scene
-      comArayCode += `${calculateUiComponent({ tojson: scene, version, origin, module, sectionsMap })},`
+      comArayCode += `${calculateUiComponent({ tojson: scene, version: publishContent.version, origin, module, sectionsMap })},`
     }
     Object.entries(scene.pinProxies).forEach(([_, pinProxy]: any) => {
       if (pinProxy.type === "extension") {
@@ -308,7 +317,7 @@ const getModule = async (params) => {
 
   toJson.global.fxFrames.forEach((fxFrame) => {
     if (fxFrame.type === "extension-api") {
-      comArayCode += `${calculateJsComponent({ tojson: fxFrame, version, origin, module })},`
+      comArayCode += `${calculateJsComponent({ tojson: fxFrame, version: publishContent.version, origin, module })},`
     }
 
     if (fxFrame.type === "extension-config") {
