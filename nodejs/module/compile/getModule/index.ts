@@ -1,7 +1,7 @@
 import API from "@mybricks/sdk-for-app/api";
-import { runtime, editors, runtimeJs } from './template';
+import { runtime, editors, runtimeJs, upgrade } from './template';
 
-function calculateUiComponent({tojson, version, origin, module, sectionsMap}) {
+function calculateUiComponent({ tojson, version, origin, module, sectionsMap }) {
   const mainScene = tojson;
   const { pinRels } = mainScene;
   const relsOutputsMap: { [key: string]: boolean } = {};
@@ -20,38 +20,38 @@ function calculateUiComponent({tojson, version, origin, module, sectionsMap}) {
     description?: string;
   }[] = [];
   const inputs = mainScene.inputs
-  .filter((input) => {
-    const { id, type, title, editor, extValues } = input;
-    if (type === "normal") {
-      const outputIds = pinRels[`_rootFrame_-${id}`];
-      inputsRelOutputsMap[id] = outputIds;
-      if (outputIds) {
-        outputIds.forEach((id) => {
-          relsOutputsMap[id] = true;
+    .filter((input) => {
+      const { id, type, title, editor, extValues } = input;
+      if (type === "normal") {
+        const outputIds = pinRels[`_rootFrame_-${id}`];
+        inputsRelOutputsMap[id] = outputIds;
+        if (outputIds) {
+          outputIds.forEach((id) => {
+            relsOutputsMap[id] = true;
+          });
+        }
+        return true;
+      } else if (type === "config" && editor?.type) {
+        config[id] = extValues?.config?.defaultValue;
+        configs.push({
+          id,
+          title: title,
+          type: editor.type,
+          defaultValue: extValues?.config?.defaultValue,
+          description: extValues?.config?.description,
         });
       }
-      return true;
-    } else if (type === "config" && editor?.type) {
-      config[id] = extValues?.config?.defaultValue;
-      configs.push({
-        id,
-        title: title,
-        type: editor.type,
-        defaultValue: extValues?.config?.defaultValue,
-        description: extValues?.config?.description,
-      });
-    }
 
-    return false;
-  })
-  .map(({ id, title, schema }) => {
-    return {
-      id,
-      title,
-      schema,
-      rels: pinRels[`_rootFrame_-${id}`],
-    };
-  });
+      return false;
+    })
+    .map(({ id, title, schema }) => {
+      return {
+        id,
+        title,
+        schema,
+        rels: pinRels[`_rootFrame_-${id}`],
+      };
+    });
 
   const outputs = mainScene.outputs.map(({ id, title, schema }) => {
     if (!relsOutputsMap[id]) {
@@ -93,7 +93,7 @@ function calculateUiComponent({tojson, version, origin, module, sectionsMap}) {
   // [TODO] version
   return `{
     namespace: "mybricks.harmony.module.${module.id}.${tojson.id}",
-    version: "0.0.1",
+    version: "${version}",
     previewImageData: "${sectionsMap?.[tojson.id]?.previewImageData || ""}",
     title: "${mainScene.title}",
     description: "${mainScene.title}",
@@ -117,11 +117,20 @@ function calculateUiComponent({tojson, version, origin, module, sectionsMap}) {
       .replace('"--replace-moduleId--"', JSON.stringify(mainScene.id))
       .replace('"--replace-moduleId--"', module.id)
       .replace('--replace-moduleVersion--', version)
-      .replace('"--replace-inputsRelOutputsMap--"', JSON.stringify(inputsRelOutputsMap))}
+      .replace('"--replace-inputsRelOutputsMap--"', JSON.stringify(inputsRelOutputsMap))},
+    upgrade: ${upgrade
+      .replace(`"__inputs__"`, JSON.stringify(inputs))
+      .replace(`"__outputs__"`, JSON.stringify(outputs))
+      .replace(
+        `"__data__"`,
+        JSON.stringify({
+          config,
+        })
+      )}
   }`
 }
 
-function calculateJsComponent({tojson, version, origin, module}) {
+function calculateJsComponent({ tojson, version, origin, module }) {
   const mainScene = tojson;
   const { pinRels } = mainScene;
   const relsOutputsMap: { [key: string]: boolean } = {};
@@ -275,7 +284,7 @@ const getModule = async (params) => {
     }
     if (scene.type === "module") {
       modules[scene.id] = scene
-      comArayCode += `${calculateUiComponent({tojson: scene, version, origin, module, sectionsMap})},`
+      comArayCode += `${calculateUiComponent({ tojson: scene, version, origin, module, sectionsMap })},`
     }
     Object.entries(scene.pinProxies).forEach(([_, pinProxy]: any) => {
       if (pinProxy.type === "extension") {
@@ -299,7 +308,7 @@ const getModule = async (params) => {
 
   toJson.global.fxFrames.forEach((fxFrame) => {
     if (fxFrame.type === "extension-api") {
-      comArayCode += `${calculateJsComponent({tojson: fxFrame, version, origin, module})},`
+      comArayCode += `${calculateJsComponent({ tojson: fxFrame, version, origin, module })},`
     }
 
     if (fxFrame.type === "extension-config") {

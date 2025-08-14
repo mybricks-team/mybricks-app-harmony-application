@@ -9,10 +9,13 @@ const editors = `function editorsTemplate(){return{"@init":function({style:i}){i
 
 const runtimeJs = `function runtimeTemplateJs({title:e,env:o,data:s,inputs:t,outputs:r}){var l="--replace-tojson--",a=Object.assign(Object.assign({},baseToJson),{scenes:[l]});o.renderModuleJs(a,{env:Object.assign({},o),extend:{env:{scenesOperate:{var:globalVariables,getGlobalComProps:function(e){return{data:{val:globalVariables.getValueById(e)}}},exeGlobalCom:function({com:e,value:o}){globalVariables.changed({com:e,value:o})}}}},ref:function(a){var n;s.refs||(s.refs=a,{config:n}=s,a?(l.inputs.forEach(({id:o,type:e})=>{"config"===e?o in n&&a.inputs[o](n[o]):t[o](e=>{a.inputs[o](e)})}),l.outputs.forEach(({id:e})=>{a.outputs(e,r[e])}),a.run()):console.error("计算组件["+e+"]refs为空"))},moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})}`
 
+const upgrade = `function upgradeTemplate({data:i,input:a,output:o}){var e="__inputs__",d="__outputs__",s="__data__";return o.get().forEach(({id:t})=>{-1===d.findIndex(e=>e.id===t)&&o.remove(t)}),d.forEach(e=>{var{id:t,title:i,schema:e}=e;o.get(t)?(o.get(t).setTitle(i),e&&o.get(t).setSchema(e)):o.add(t,i,e||{})}),a.get().forEach(({id:t})=>{-1===e.findIndex(e=>e.id===t)&&a.remove(t)}),e.forEach(e=>{const{id:t,title:i,schema:o,rels:d=[]}=e;a.get(t)?(a.get(t).setTitle(i),o&&a.get(t).setSchema(o)):a.add(t,i,o||{});const s=a.get(t).rels||[];s.join()!==d.join()&&a.get(t).setRels(d)}),Object.keys((null==i?void 0:i.configs)||{}).forEach(e=>{var t;void 0===(null===(t=s.configs)||void 0===t?void 0:t[e])&&(s.configs[e]=null==i?void 0:i.configs[e])}),!0}`
+
 export {
   runtime,
   editors,
-  runtimeJs
+  runtimeJs,
+  upgrade
 }
 
 const baseToJson = {};
@@ -266,4 +269,58 @@ function runtimeTemplateJs({
     moduleId: "--replace-moduleId--",
     moduleVersion: "--replace-moduleVersion--",
   });
+}
+
+function upgradeTemplate({ data, input, output }: any) {
+  const currentInputs: any = "__inputs__";
+  const currentOutputs: any = "__outputs__";
+  const currentData: any = "__data__";
+
+  output.get().forEach(({ id }: any) => {
+    const index = currentOutputs.findIndex((item: any) => item.id === id);
+    if (index === -1) {
+      output.remove(id);
+    }
+  });
+  currentOutputs.forEach((pin: any) => {
+    const { id, title, schema } = pin;
+    if (!output.get(id)) {
+      output.add(id, title, schema ? schema : {});
+    } else {
+      output.get(id).setTitle(title);
+      if (schema) {
+        output.get(id).setSchema(schema);
+      }
+    }
+  });
+
+  input.get().forEach(({ id }: any) => {
+    const index = currentInputs.findIndex((item: any) => item.id === id);
+    if (index === -1) {
+      input.remove(id);
+    }
+  });
+  currentInputs.forEach((pin: any) => {
+    const { id, title, schema, rels = [] } = pin;
+    if (!input.get(id)) {
+      input.add(id, title, schema ? schema : {});
+    } else {
+      input.get(id).setTitle(title);
+      if (schema) {
+        input.get(id).setSchema(schema);
+      }
+    }
+    const vRels: string[] = input.get(id).rels || [];
+    if (vRels.join() !== rels.join()) {
+      input.get(id).setRels(rels);
+    }
+  });
+
+  Object.keys(data?.configs || {}).forEach((key) => {
+    if (currentData?.configs?.[key] === undefined) {
+      currentData.configs[key] = data?.configs[key];
+    }
+  });
+
+  return true;
 }
