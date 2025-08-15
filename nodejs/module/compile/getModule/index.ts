@@ -90,6 +90,15 @@ function calculateUiComponent({ tojson, version, origin, module, sectionsMap }) 
   slotStyle.widthFull = true;
   slotStyle.heightFull = true;
 
+  const resizeOptions = [];
+
+  if (replaceWidth === '"100%"') {
+    resizeOptions.push("width")
+  }
+  if (replaceHeight === '"100%"') {
+    resizeOptions.push("height")
+  }
+
   // [TODO] version
   return `{
     namespace: "mybricks.harmony.module.${module.id}.${tojson.id}",
@@ -104,6 +113,7 @@ function calculateUiComponent({ tojson, version, origin, module, sectionsMap }) 
     editors: (${editors
       .replace('"--replace-init-width--"', replaceWidth)
       .replace('"--replace-init-height--"', replaceHeight)
+      .replace('"--replace-@resize-options"', JSON.stringify(resizeOptions))
       .replace('"--replace-title--"', `"${mainScene.title}"`)
       .replace('"--replace-configs--"', JSON.stringify(configs))
       .replace(
@@ -126,7 +136,9 @@ function calculateUiComponent({ tojson, version, origin, module, sectionsMap }) 
         JSON.stringify({
           config,
         })
-      )}
+      )
+      .replace(`"__height__"`, replaceHeight)
+      .replace(`"__width__"`, replaceWidth)}
   }`
 }
 

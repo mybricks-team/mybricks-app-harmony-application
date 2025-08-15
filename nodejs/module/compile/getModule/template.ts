@@ -5,11 +5,11 @@
  */
 const runtime = `function runtimeTemplate({env:o,data:a,inputs:s,outputs:i}){const e=window.React,[u,t]=e.useState(1);return e.useEffect(()=>{var e=()=>{t(e=>e+1)};return reRenderSet.add(e),()=>{reRenderSet.delete(e)}},[]),e.useMemo(()=>{const e=modules["--replace-moduleId--"];var l="--replace-inputsRelOutputsMap--",t=Object.assign(Object.assign({},baseToJson),{scenes:[e]});let n=!1;return(o.runtime?o.renderModuleComponent:o.renderCom)(t,{env:Object.assign({},o),extend:{env:{scenesOperate:{var:globalVariables,getGlobalComProps:function(e){return{data:{val:globalVariables.getValueById(e)}}},exeGlobalCom:function({com:e,value:t}){globalVariables.changed({com:e,value:t})}}}},ref:function(r){if(!n){n=!0,a.refs=r;var{config:t}=a;let u=0;e.inputs.forEach(({id:a,type:e})=>{"config"===e?a in t&&r.inputs[a](t[a]):s[a]((e,t)=>{var n,o=++u;0<(null===(n=l[a])||void 0===n?void 0:n.length)?(l[a].forEach(e=>{r.outputs(e+"&execute&"+o,t[e])}),r.inputs[a+"&execute&"+o](e)):r.inputs[a](e)})}),e.outputs.forEach(({id:e})=>{var t;0<(null===(t=l[e])||void 0===t?void 0:t.length)||r.outputs(e,i[e])}),r.run()}},disableAutoRun:!0,moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--",reRenderKey:u})},[u])}`;
 
-const editors = `function editorsTemplate(){return{"@init":function({style:i}){i.width="--replace-init-width--",i.height="--replace-init-height--"},"@resize":{options:["width","height"]},":root":(i,t,e)=>{var n="--origin--";t.title="--replace-title--",t.items=[..."--replace-configs--".map(({id:e,title:i,type:t,defaultValue:n,description:o})=>({title:i,type:t,description:o,value:{get:function({data:i}){return e in i.config?i.config[e]:i.config[e]=n},set:function({data:i},t){i.config[e]=t,i.refs&&i.refs.inputs[e](t)}}})),{title:"事件",ifVisible:function(){return"--replace-events-visible--"},items:[..."--replace-events--".map(({id:i,title:t})=>({title:t,type:"_Event",options:()=>({outputId:i})}))]}],n===window.location.origin&&(e.title="高级",e.items=[{title:"打开模块搭建页面",type:"button",ifVisible:function({}){return n===window.location.origin},value:{set:function(){window.open('/mybricks-app-harmony-module/index.html?id="--replace-id--"')}}}])}}}`;
+const editors = `function editorsTemplate(){return{"@init":function({style:i}){i.width="--replace-init-width--",i.height="--replace-init-height--"},"@resize":{options:"--replace-@resize-options"},":root":(i,t,e)=>{var n="--origin--";t.title="--replace-title--",t.items=[..."--replace-configs--".map(({id:e,title:i,type:t,defaultValue:n,description:o})=>({title:i,type:t,description:o,value:{get:function({data:i}){return e in i.config?i.config[e]:i.config[e]=n},set:function({data:i},t){i.config[e]=t,i.refs&&i.refs.inputs[e](t)}}})),{title:"事件",ifVisible:function(){return"--replace-events-visible--"},items:[..."--replace-events--".map(({id:i,title:t})=>({title:t,type:"_Event",options:()=>({outputId:i})}))]}],n===window.location.origin&&(e.title="高级",e.items=[{title:"打开模块搭建页面",type:"button",ifVisible:function({}){return n===window.location.origin},value:{set:function(){window.open('/mybricks-app-harmony-module/index.html?id="--replace-id--"')}}}])}}}`;
 
 const runtimeJs = `function runtimeTemplateJs({title:e,env:o,data:s,inputs:t,outputs:r}){var l="--replace-tojson--",a=Object.assign(Object.assign({},baseToJson),{scenes:[l]});o.renderModuleJs(a,{env:Object.assign({},o),extend:{env:{scenesOperate:{var:globalVariables,getGlobalComProps:function(e){return{data:{val:globalVariables.getValueById(e)}}},exeGlobalCom:function({com:e,value:o}){globalVariables.changed({com:e,value:o})}}}},ref:function(a){var n;s.refs||(s.refs=a,{config:n}=s,a?(l.inputs.forEach(({id:o,type:e})=>{"config"===e?o in n&&a.inputs[o](n[o]):t[o](e=>{a.inputs[o](e)})}),l.outputs.forEach(({id:e})=>{a.outputs(e,r[e])}),a.run()):console.error("计算组件["+e+"]refs为空"))},moduleId:"--replace-moduleId--",moduleVersion:"--replace-moduleVersion--"})}`
 
-const upgrade = `function upgradeTemplate({data:i,input:a,output:o}){var e="__inputs__",d="__outputs__",s="__data__";return o.get().forEach(({id:t})=>{-1===d.findIndex(e=>e.id===t)&&o.remove(t)}),d.forEach(e=>{var{id:t,title:i,schema:e}=e;o.get(t)?(o.get(t).setTitle(i),e&&o.get(t).setSchema(e)):o.add(t,i,e||{})}),a.get().forEach(({id:t})=>{-1===e.findIndex(e=>e.id===t)&&a.remove(t)}),e.forEach(e=>{const{id:t,title:i,schema:o,rels:d=[]}=e;a.get(t)?(a.get(t).setTitle(i),o&&a.get(t).setSchema(o)):a.add(t,i,o||{});const s=a.get(t).rels||[];s.join()!==d.join()&&a.get(t).setRels(d)}),Object.keys((null==i?void 0:i.configs)||{}).forEach(e=>{var t;void 0===(null===(t=s.configs)||void 0===t?void 0:t[e])&&(s.configs[e]=null==i?void 0:i.configs[e])}),!0}`
+const upgrade = `function upgradeTemplate(e){const{data:i,input:n,output:o}=e;var d="__inputs__",s="__outputs__",a="__data__";return o.get().forEach(({id:t})=>{-1===s.findIndex(e=>e.id===t)&&o.remove(t)}),s.forEach(e=>{var{id:t,title:i,schema:e}=e;o.get(t)?(o.get(t).setTitle(i),e&&o.get(t).setSchema(e)):o.add(t,i,e||{})}),n.get().forEach(({id:t})=>{-1===d.findIndex(e=>e.id===t)&&n.remove(t)}),d.forEach(e=>{const{id:t,title:i,schema:o,rels:d=[]}=e;n.get(t)?(n.get(t).setTitle(i),o&&n.get(t).setSchema(o)):n.add(t,i,o||{});const s=n.get(t).rels||[];s.join()!==d.join()&&n.get(t).setRels(d)}),Object.keys((null===i||void 0===i?void 0:i.configs)||{}).forEach(e=>{var t;void 0===(null===(t=a.configs)||void 0===t?void 0:t[e])&&(a.configs[e]=null===i||void 0===i?void 0:i.configs[e])}),e.style,!0}`
 
 export {
   runtime,
@@ -126,7 +126,7 @@ function editorsTemplate() {
       style.height = "--replace-init-height--";
     },
     '@resize': {
-      options: ['width', 'height']
+      options: "--replace-@resize-options"
     },
     ":root": (_: any, cate1: any, cate2: any) => {
       const origin = "--origin--";
@@ -271,10 +271,13 @@ function runtimeTemplateJs({
   });
 }
 
-function upgradeTemplate({ data, input, output }: any) {
-  const currentInputs: any = "__inputs__";
+function upgradeTemplate(params: any) {
+  const { data, input, output } = params;
+  const inputs: any = "__inputs__";
   const currentOutputs: any = "__outputs__";
   const currentData: any = "__data__";
+  const newHeight: any = "__height__";
+  const newWidth: any = "__width__";
 
   output.get().forEach(({ id }: any) => {
     const index = currentOutputs.findIndex((item: any) => item.id === id);
@@ -295,12 +298,12 @@ function upgradeTemplate({ data, input, output }: any) {
   });
 
   input.get().forEach(({ id }: any) => {
-    const index = currentInputs.findIndex((item: any) => item.id === id);
+    const index = inputs.findIndex((item: any) => item.id === id);
     if (index === -1) {
       input.remove(id);
     }
   });
-  currentInputs.forEach((pin: any) => {
+  inputs.forEach((pin: any) => {
     const { id, title, schema, rels = [] } = pin;
     if (!input.get(id)) {
       input.add(id, title, schema ? schema : {});
@@ -321,6 +324,28 @@ function upgradeTemplate({ data, input, output }: any) {
       currentData.configs[key] = data?.configs[key];
     }
   });
+
+  if (params.style) {
+    if (newHeight === "auto") {
+      params.style.height = newHeight;
+      params.style.heightAuto = true;
+      params.style.heightFull = false;
+    } else if (typeof newHeight === "number") {
+      params.style.height = newHeight;
+      params.style.heightAuto = false;
+      params.style.heightFull = false;
+    }
+
+    if (newWidth === "auto") {
+      params.style.width = newWidth;
+      params.style.widthAuto = true;
+      params.style.widthFull = false;
+    } else if (typeof newWidth === "number") {
+      params.style.width = newWidth;
+      params.style.widthAuto = false;
+      params.style.widthFull = false;
+    }
+  }
 
   return true;
 }
