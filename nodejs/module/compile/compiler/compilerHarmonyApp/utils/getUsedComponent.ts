@@ -23,7 +23,7 @@ const getUsedComponent = (params) => {
       const componentName = asImportName.replace("Basic", "");
       const { hasSlots } = componentMetaMap[namespace]
       declaredComponentCode += `@Builder
-      function ${componentName}Builder (params: MyBricksComponentBuilderParams) {
+      export function ${componentName} (params: MyBricksComponentBuilderParams) {
         ${asImportName}({
           uid: params.uid,
           data: new ${importData}(params.data as MyBricks.Any),
@@ -35,42 +35,10 @@ const getUsedComponent = (params) => {
           parentSlot: params.parentSlot,
           env,
           _env,
+          modifier: createModifier(params, CommonModifier)
         })
       }
-      
-      @ComponentV2
-      export struct ${componentName} {
-        @Param @Require uid: string;
-        ${verbose ? "@Param @Require title: string;" : ""}
-        @Param controller: MyBricks.Controller = Controller();
-        @Param @Require data: MyBricks.Data
-        @Param events: MyBricks.Events = {}
-        @Param styles: Styles = {};
-        @Local columnVisibilityController: ColumnVisibilityController = new ColumnVisibilityController()
-        ${hasSlots ? "@BuilderParam slots : (params: MyBricks.SlotParams) => void = Slot;" : ""}
-        ${hasSlots ? "@Local slotsIO: MyBricks.Any = createSlotsIO();" : ""}
-        @Param parentSlot?: MyBricks.SlotParams = undefined
-
-        myBricksColumnModifier = new MyBricksColumnModifier(this.styles.root)
-
-        build() {
-          Column() {
-            if (this.parentSlot?.itemWrap) {
-              this.parentSlot.itemWrap({
-                id: this.uid,
-                inputs: this.controller._inputEvents
-              }).wrap.builder(wrapBuilder(${componentName}Builder), this, this.parentSlot.itemWrap({
-                id: this.uid,
-                inputs: this.controller._inputEvents
-              }).params)
-            } else {
-              ${componentName}Builder(this)
-            }
-          }
-          .attributeModifier(this.myBricksColumnModifier)
-          .visibility(this.columnVisibilityController.visibility)
-        }
-      }\n`
+      \n`
     } else {
       let componentName = asImportName.replace("basic", "");
       componentName = componentName[0].toLowerCase() + componentName.slice(1);

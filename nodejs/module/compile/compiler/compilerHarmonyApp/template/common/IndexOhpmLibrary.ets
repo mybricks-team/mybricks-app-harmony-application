@@ -1,5 +1,5 @@
-import { appRouter } from "../../../utils";
-import generateCode from "./codes";
+import { appRouter } from "../../../utils/Index"
+import jsModulesGenerator from "./JSModules";
 import {
   MyBricks,
   genCallConnector,
@@ -12,7 +12,7 @@ import { globalVars, globalFxs } from "./global";
 
 /** 场景打开、输出 */
 const page: MyBricks.Any = new Page(appRouter);
-const codes: MyBricks.Codes = generateCode({ createJSHandle, context });
+const jsModules: MyBricks.Codes = jsModulesGenerator({ createJSHandle, context });
 const vars: ESObject = createVars(globalVars);
 const _env: MyBricks._Env = {
   currentScenes: {
@@ -22,7 +22,7 @@ const _env: MyBricks._Env = {
   }
 }
 const env: MyBricks.Env = {
-  callConnector: genCallConnector(codes, { domain: undefined }, { globalVars: vars }),
+  callConnector: genCallConnector(jsModules, { domain: undefined }, { globalVars: vars }),
   appRouter,
   globalVars: vars
 };
@@ -30,4 +30,4 @@ const env: MyBricks.Env = {
 context.env = env;
 context._env = _env;
 
-export { codes, page, globalVars, globalFxs }
+export { jsModules, page, globalVars, globalFxs }

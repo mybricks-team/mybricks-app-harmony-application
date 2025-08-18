@@ -1,24 +1,28 @@
-import { appRouter } from "../../../utils"
-import generateCode from "./codes";
-import { createJSHandle, createInputsHandle, createEventsHandle, Page, createVariable, createVars, createFx, createSlotsIO, createModuleInputsHandle, createStyles, join } from "../../../utils/mybricks"
+import { AttributeUpdater } from '@ohos.arkui.modifier'
+import { appRouter } from "../../../utils/Index"
+import jsModulesGenerator from "./JSModules";
+import { createJSHandle, createInputsHandle, createEventsHandle, Page, createVariable, createVars, createFx, createSlotsIO, createModuleInputsHandle, createStyles, join, createModuleEventsHandle, createModifier } from "../../../utils/mybricks"
 import { genCallConnector } from "../../../utils/CallConnector"
 import { MyBricks } from "../../../utils/types"
 import { globalVars, globalFxs } from "./global"
-$r('app.components.component.import')
+$r('app.common.component.import')
 
 type Style = Record<string, string | number>;
 export type Styles = Record<string, Style>;
 interface MyBricksComponentBuilderParams {
   uid: string
-  controller: MyBricks.Controller
+  title?: string
+  controller?: MyBricks.Controller
   data: MyBricks.Data
-  events: MyBricks.Events
+  events?: MyBricks.Events
   styles: Styles
-  columnVisibilityController: ColumnVisibilityController
-  myBricksColumnModifier: MyBricksColumnModifier
   slots?: (params: MyBricks.SlotParams) => void
   slotsIO?: MyBricks.Any
   parentSlot?: MyBricks.SlotParams
+}
+
+class CommonModifier extends AttributeUpdater<CommonAttribute> {
+
 }
 
 export class MyBricksColumnModifier implements AttributeModifier<ColumnAttribute> {
@@ -85,8 +89,6 @@ export class ColumnVisibilityController {
   }
 }
 
-@Builder function Slot(params: MyBricks.SlotParams) {}
-
 interface Context {
   env?: MyBricks.Env
   _env?: MyBricks._Env
@@ -100,10 +102,12 @@ const _env: MyBricks._Env = {
     }
   }
 }
+
 const vars: ESObject = createVars(globalVars)
-const codes: MyBricks.Codes = generateCode({ createJSHandle, context });
+const jsModules: MyBricks.Codes = jsModulesGenerator({ createJSHandle, context });
+
 const env: MyBricks.Any = {
-  callConnector: genCallConnector(codes, { domain: undefined }, { globalVars: vars }),
+  callConnector: genCallConnector(jsModules, { domain: undefined }, { globalVars: vars }),
   appRouter,
   globalVars: vars
 }
@@ -122,13 +126,14 @@ export const ModuleController = () => {
 /** 场景打开、输出 */
 export const page = new Page(appRouter);
 
-$r('app.components.component.declared')
+$r('app.common.component.declared')
 
 export {
-  codes,
+  jsModules,
   globalFxs,
   globalVars,
   createVariable,
   createFx,
-  join
+  join,
+  createModuleEventsHandle
 }

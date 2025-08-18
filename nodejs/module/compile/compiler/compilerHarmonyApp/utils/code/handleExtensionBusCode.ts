@@ -32,6 +32,13 @@ const handleExtensionBusCode = (page, { params }) => {
       importType: "named",
     });
   }
+  if (page.content.includes("merge(")) {
+    page.importManager.addImport({
+      packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      dependencyNames: ["merge"],
+      importType: "named",
+    });
+  }
   if (page.content.includes("bus.")) {
     page.content = page.content.replace("bus.", "this.");
   }

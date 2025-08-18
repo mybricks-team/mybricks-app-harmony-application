@@ -32,6 +32,13 @@ const handleGlobalCode = (page, { params, key }) => {
       importType: "named",
     });
   }
+  if (page.content.includes("merge(")) {
+    page.importManager.addImport({
+      packageName: download.source === "sourceCode" ? "../../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      dependencyNames: ["merge"],
+      importType: "named",
+    });
+  }
   if (page.content.includes("bus.")) {
     if (key === "app") {
       page.importManager.addImport({

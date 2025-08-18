@@ -44,12 +44,6 @@ const copyUtils = async (params, config) => {
   if (download.source !== "ohpmLibrary") {
     // 拷贝utils
     await fse.copy(path.join(__dirname, "./template/utils"), path.join(targetPath, "utils"), { overwrite: true })
-    // 写utils/mybricks.js
-    // await fse.writeFile(
-    //   path.join(targetPath, "utils/mybricks.js"),
-    //   createUtilsMybricks({ useLog }),
-    //   'utf-8'
-    // )
   } else {
     await fse.copy(path.join(__dirname, "./template/utils/AppRouter.ets"), path.join(targetPath, "utils/AppRouter.ets"), { overwrite: true })
     await fse.copy(path.join(__dirname, "./template/utils/AppWindow.ets"), path.join(targetPath, "utils/AppWindow.ets"), { overwrite: true })
@@ -82,33 +76,33 @@ const copyComlib = async (params, config) => {
   }
 }
 
-const copyComponents = (params, config) => {
+const copyCommon = (params, config) => {
   const { data } = params;
   const { download } = data;
   const { targetPath, importComponentCode, declaredComponentCode, appConfig } = config;
 
-  // 拷贝components
+  // 拷贝common
   if (download.source === "ohpmLibrary") {
-    fse.copySync(path.join(__dirname, "./template/components/indexOhpmLibrary.ets"), path.join(targetPath, "components/index.ets"), { overwrite: true })
+    fse.copySync(path.join(__dirname, "./template/common/IndexOhpmLibrary.ets"), path.join(targetPath, "common/Index.ets"), { overwrite: true })
     fse.writeFileSync(
-      path.join(targetPath, "components/index.ets"),
-      (fse.readFileSync(path.join(__dirname, "./template/components/indexOhpmLibrary.ets"), 'utf-8'))
+      path.join(targetPath, "common/Index.ets"),
+      (fse.readFileSync(path.join(__dirname, "./template/common/IndexOhpmLibrary.ets"), 'utf-8'))
         .replace(
           "{ domain: undefined }",
           `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
         )
     );
   } else {
-    fse.copySync(path.join(__dirname, "./template/components/index.ets"), path.join(targetPath, "components/index.ets"), { overwrite: true })
+    fse.copySync(path.join(__dirname, "./template/common/Index.ets"), path.join(targetPath, "common/Index.ets"), { overwrite: true })
     fse.writeFileSync(
-      path.join(targetPath, "components/index.ets"),
-      (fse.readFileSync(path.join(__dirname, "./template/components/index.ets"), 'utf-8'))
+      path.join(targetPath, "common/Index.ets"),
+      (fse.readFileSync(path.join(__dirname, "./template/common/Index.ets"), 'utf-8'))
         .replace(
           "{ domain: undefined }",
           `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
         )
-        .replace("$r('app.components.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
-        .replace("$r('app.components.component.declared')", declaredComponentCode)
+        .replace("$r('app.common.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
+        .replace("$r('app.common.component.declared')", declaredComponentCode)
     );
   }
 }
@@ -118,22 +112,13 @@ const copyJs = (params, config) => {
   const { download } = data;
   const { targetPath, code } = config;
 
-  const jsCodePath = path.join(targetPath, "components/codes.ts");
-  // const jsCodePath = path.join(targetPath, download.source === "ohpmLibrary" ? "components/codes.ts" : "components/codes.js");
-  fse.ensureFileSync(jsCodePath)
-  fse.writeFileSync(jsCodePath, `export default function({ createJSHandle, context }) {
+  const jsModulesPath = path.join(targetPath, "common/JSModules.ts");
+  fse.ensureFileSync(jsModulesPath)
+  fse.writeFileSync(jsModulesPath, `export default function({ createJSHandle, context }) {
     const comModules = {};
     ${code};
     return comModules;
   }`, { encoding: "utf8" })
-  // fse.writeFileSync(jsCodePath, download.source === "ohpmLibrary" ? `export default function({ createJSHandle, context }) {
-  //   const comModules = {};
-  //   ${code};
-  //   return comModules;
-  // }` : `export default (function(comModules) {
-  //   ${code};
-  //   return comModules;
-  // })({})`, { encoding: "utf8" })
 }
 
 const handleApiCode = (params, config) => {
@@ -155,7 +140,6 @@ const compilerHarmonyApp = async (params, config) => {
   const { toJson, installedModules, componentMetaMap, allModules, pages, appConfig, tabBarJson, comlibs, download } = data;
 
   // 目标项目路径
-  // const targetAppPath = path.join(projectPath, `Application_${new Date().getTime()}`);
   const targetAppPath = path.join(projectPath, download.fileName || "Application");
 
   // 拷贝项目
@@ -237,12 +221,6 @@ const compilerHarmonyApp = async (params, config) => {
     let extensionApiCode = "";
 
     pageCode.forEach((page) => {
-      // if (page.type === "extensionEvent") {
-      //   // 业务模块
-      //   apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.open')", page.content)
-      //   return
-      // }
-
       // 正常也只有app会有extension-bus(系统总线)
       if (page.type === "extension-bus") {
         // 有脏数据，需要兼容下，正常只有app下才会有extension-bus
@@ -268,7 +246,7 @@ const compilerHarmonyApp = async (params, config) => {
 
       if (page.type === "global") {
         // 全局变量、全局Fx
-        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/components/global.ets`), handleGlobalCode(page, { params, key }), { encoding: "utf8" })
+        fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/common/global.ets`), handleGlobalCode(page, { params, key }), { encoding: "utf8" })
         return
       }
 
@@ -332,7 +310,7 @@ const compilerHarmonyApp = async (params, config) => {
     if (moduleNames.size) {
       // 有区块，补充区块的入口文件
       fse.outputFileSync(
-        path.join(targetEtsPath, `modules/${moduleName}/sections/index.ets`),
+        path.join(targetEtsPath, `modules/${moduleName}/sections/Index.ets`),
         Array.from(moduleNames).reduce((pre, cur) => {
           return pre + `export { default as ${cur} } from "./${cur}"\n`
         }, ""),
@@ -341,23 +319,12 @@ const compilerHarmonyApp = async (params, config) => {
 
     const { importComponentCode, declaredComponentCode } = getUsedComponent({ usedComponentsMap, componentMetaMap, verbose: useLog })
 
-    copyComponents(params, {
+    copyCommon(params, {
       targetPath: path.join(targetEtsPath, `modules/${moduleName}`),
       importComponentCode,
       declaredComponentCode,
-      appConfig
+      appConfig: Object.assign(appConfig, data.appConfig)
     })
-
-    // fse.writeFileSync(
-    //   path.join(targetEtsPath, `modules/${moduleName}/components/index.ets`),
-    //   fse.readFileSync(path.join(__dirname, "./template/components/index.ets"), "utf-8")
-    //     .replace(
-    //       "{ domain: undefined }",
-    //       `{ domain: ${data.appConfig?.defaultCallServiceHost ? JSON.stringify(data.appConfig?.defaultCallServiceHost) : undefined}}`,
-    //     )
-    //     .replace("$r('app.components.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
-    //     .replace("$r('app.components.component.declared')", declaredComponentCode)
-    // );
 
     if (key !== "app") {
       // app不需要api

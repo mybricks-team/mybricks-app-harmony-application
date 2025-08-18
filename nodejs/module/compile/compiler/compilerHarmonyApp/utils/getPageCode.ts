@@ -35,7 +35,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
 
         return {
           dependencyImport: {
-            packageName: `../../${moduleName}/sections`,
+            packageName: `../../${moduleName}/sections/Index`,
             dependencyNames: [`${sectionName} as ${componentName}`],
             importType: "named",
           },
@@ -58,7 +58,7 @@ const getPageCode = async (params, modulesData, result = { }) => {
 
       return {
         dependencyImport: {
-          packageName: download.source === "sourceCode" ? (config.source === "extensionEvent" ? "./components" : COMPONENT_PACKAGE_NAME) : "@mybricks/comlib-harmony-normal",
+          packageName: download.source === "sourceCode" ? (config.source === "extensionEvent" ? "./common/Index" : COMPONENT_PACKAGE_NAME) : "@mybricks/comlib-harmony-normal",
           dependencyNames,
           importType: "named",
         },
@@ -67,9 +67,9 @@ const getPageCode = async (params, modulesData, result = { }) => {
     },
     getComponentPackageName(params) {
       if (params?.type === "extensionEvent") {
-        return download.source === "sourceCode" ? "./components" : "./components"
+        return download.source === "sourceCode" ? "./common/Index" : "./common/Index"
       }
-      return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "../components"
+      return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "../common/Index"
     },
     getUtilsPackageName() {
       return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "@mybricks/render-utils"
@@ -84,6 +84,19 @@ const getPageCode = async (params, modulesData, result = { }) => {
     getBus,
     getApi,
     verbose,
+    getModuleApi(type) {
+      if (type === "event") {
+        const componentName = "events";
+        return {
+          dependencyImport: {
+            packageName: "../api",
+            dependencyNames: [componentName],
+            importType: "named",
+          },
+          componentName,
+        };
+      }
+    }
   });
 
   result[key] = {

@@ -62,7 +62,7 @@ const handlePageCode = (page, {
   switch (navigationStyle) {
     case 'default': {
       page.importManager.addImport({
-        packageName: "../../../utils",
+        packageName: "../../../utils/Index",
         dependencyNames: ["AppCommonHeader"],
         importType: "named",
       });
@@ -90,7 +90,7 @@ ${page.content}
     }
     case 'custom': {
       page.importManager.addImport({
-        packageName: "../../../utils",
+        packageName: "../../../utils/Index",
         dependencyNames: ["AppCustomHeader"],
         importType: "named",
       });
