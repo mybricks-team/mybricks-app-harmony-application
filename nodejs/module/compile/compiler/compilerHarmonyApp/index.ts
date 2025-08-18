@@ -47,7 +47,7 @@ const copyUtils = async (params, config) => {
   } else {
     await fse.copy(path.join(__dirname, "./template/utils/AppRouter.ets"), path.join(targetPath, "utils/AppRouter.ets"), { overwrite: true })
     await fse.copy(path.join(__dirname, "./template/utils/AppWindow.ets"), path.join(targetPath, "utils/AppWindow.ets"), { overwrite: true })
-    await fse.copy(path.join(__dirname, "./template/utils/index.ets"), path.join(targetPath, "utils/index.ets"), { overwrite: true })
+    await fse.copy(path.join(__dirname, "./template/utils/Index.ets"), path.join(targetPath, "utils/Index.ets"), { overwrite: true })
   }
 }
 
