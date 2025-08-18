@@ -13,6 +13,8 @@ const loadPage = async (params) => {
   }
 
   const httpPlugin = publishContent.content.data.toJson.plugins['@mybricks/plugins/service'];
+  const module = publishContent.content;
+  const { appConfig } = module.data;
 
   if (Array.isArray(httpPlugin?.connectors)) {
     Object.entries(json.coms).forEach(([_, com]: any) => {
@@ -29,6 +31,10 @@ const loadPage = async (params) => {
               globalResultFn: httpPlugin.config.resultFn,
               globalErrorResultFn: httpPlugin.config.errorResultFn,
             }
+          }
+
+          if (!/^(http|https):\/\/.*/.test(com.model.data.connector.path) && appConfig?.defaultCallServiceHost) {
+            com.model.data.connector.path = `${appConfig.defaultCallServiceHost}${com.model.data.connector.path}`;
           }
         }
       }

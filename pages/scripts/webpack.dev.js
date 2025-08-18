@@ -44,7 +44,7 @@ module.exports = merge(common, {
           "/api/harmony-application/wx/test",
           "/api/harmony-application/miniapp/searchUser"
         ],
-        target: "http://localhost:3000",
+        target: "http://localhost:3001",
         secure: false,
         changeOrigin: true,
       },

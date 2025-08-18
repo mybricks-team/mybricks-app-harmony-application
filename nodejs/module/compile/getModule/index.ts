@@ -255,7 +255,7 @@ const getModule = async (params) => {
 
   // [TODO]
   const module = publishContent.content;
-  const { toJson, sectionsMap } = module.data;
+  const { toJson, sectionsMap, appConfig } = module.data;
   toJson.global.fxFrames.forEach((fxFrame) => {
     Object.entries(fxFrame.pinProxies).forEach(([_, pinProxy]: any) => {
       if (pinProxy.type === "extension") {
@@ -298,6 +298,10 @@ const getModule = async (params) => {
                 globalResultFn: httpPlugin.config.resultFn,
                 globalErrorResultFn: httpPlugin.config.errorResultFn,
               }
+            }
+
+            if (!/^(http|https):\/\/.*/.test(com.model.data.connector.path) && appConfig?.defaultCallServiceHost) {
+              com.model.data.connector.path = `${appConfig.defaultCallServiceHost}${com.model.data.connector.path}`;
             }
           }
         }
