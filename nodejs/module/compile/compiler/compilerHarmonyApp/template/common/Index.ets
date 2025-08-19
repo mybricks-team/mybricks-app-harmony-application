@@ -1,7 +1,7 @@
 import { AttributeUpdater } from '@ohos.arkui.modifier'
 import { appRouter } from "../../../utils/Index"
 import jsModulesGenerator from "./JSModules";
-import { createJSHandle, createInputsHandle, createEventsHandle, Page, createVariable, createVars, createFx, createSlotsIO, createModuleInputsHandle, createStyles, join, createModuleEventsHandle, createModifier } from "../../../utils/mybricks"
+import { createJSHandle, createInputsHandle, createEventsHandle, Page, createVariable, createVars, createFx, createSlotsIO, createModuleInputsHandle, createStyles, join, createModuleEventsHandle, createModifier, createData } from "../../../utils/mybricks"
 import { genCallConnector } from "../../../utils/CallConnector"
 import { MyBricks } from "../../../utils/types"
 import { globalVars, globalFxs } from "./global"
@@ -21,8 +21,21 @@ interface MyBricksComponentBuilderParams {
   parentSlot?: MyBricks.SlotParams
 }
 
-class CommonModifier extends AttributeUpdater<CommonAttribute> {
+interface CommonModifierParams {
+  visibility: Visibility
+}
 
+class CommonModifier extends AttributeUpdater<CommonAttribute> {
+  private _initModifier: CommonModifierParams;
+
+  constructor(_initModifier: CommonModifierParams) {
+    super();
+    this._initModifier = _initModifier;
+  }
+
+  initializeModifier(instance: CommonAttribute): void {
+    instance.visibility(this._initModifier.visibility)
+  }
 }
 
 export class MyBricksColumnModifier implements AttributeModifier<ColumnAttribute> {

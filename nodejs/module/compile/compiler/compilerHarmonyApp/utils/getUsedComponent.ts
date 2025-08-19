@@ -26,7 +26,7 @@ const getUsedComponent = (params) => {
       export function ${componentName} (params: MyBricksComponentBuilderParams) {
         ${asImportName}({
           uid: params.uid,
-          data: new ${importData}(params.data as MyBricks.Any),
+          data: createData(params, ${importData}),
           inputs: createInputsHandle(params),
           outputs: createEventsHandle(params),
           styles: createStyles(params),
