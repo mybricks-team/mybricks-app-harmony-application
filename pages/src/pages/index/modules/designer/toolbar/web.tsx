@@ -14,6 +14,7 @@ interface WebToolbarProps {
   operable: boolean;
   globalOperable: boolean;
   statusChange: any;
+  toggleLock: any;
   isModify?: boolean;
   designerRef: any;
   onSave: any;
@@ -29,6 +30,7 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
   operable,
   globalOperable,
   statusChange,
+  toggleLock,
   isModify = false,
   designerRef,
   onSave,
@@ -93,6 +95,7 @@ export const WebToolbar: React.FC<WebToolbarProps> = ({
           // @ts-ignore 更新sdk类型定义
           getExtraFileIds={() => true}
           autoLock={true}
+          toggleLock={toggleLock}
           beforeToggleLock={
             window.__type__ === "mpa"
               ? () => {

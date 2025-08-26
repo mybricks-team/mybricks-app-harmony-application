@@ -31,6 +31,7 @@ import { CompileType } from "@/types";
 import { DESIGNER_STATIC_PATH, HARMONY_COM_LIB } from "../../../../constants";
 import { ExclamationCircleFilled, CheckCircleFilled } from "@ant-design/icons";
 import cloneDeep from "lodash/cloneDeep"
+import { initOperableTips } from "./initOperableTips";
 
 // message.success(
 //  "保存成功",
@@ -1376,7 +1377,7 @@ const Designer = ({ appData }) => {
       <AppToolbar
         operable={operable}
         globalOperable={globalOperable}
-        statusChange={(status, file, extraFiles, isNew) => {
+        statusChange={({ status, file, extraFiles, isNew, init }) => {
           // setOperable(status === 1);
           let operable = status === 1;
           pageModel.operable = status === 1;
@@ -1387,6 +1388,11 @@ const Designer = ({ appData }) => {
 
           if (!isNew || window.__type__ === "spa") {
             pageModel.canSave = operable;
+            if (init && !operable) {
+              initOperableTips({
+                type: "spa",
+              })
+            }
             setOperable(operable);
             setGlobalOperable(operable);
             return;
@@ -1482,6 +1488,12 @@ const Designer = ({ appData }) => {
           pageModel.canSave = operable;
           setOperable(operable);
 
+          if (init && !operable) {
+            initOperableTips({
+              type: "mpa",
+            })
+          }
+
           // console.log("cooperationAry => ", cooperationAry)
 
           if (!designerRef.current) {
@@ -1489,6 +1501,9 @@ const Designer = ({ appData }) => {
           } else {
             designerRef.current?.setCooperationAry(cooperationAry);
           }
+        }}
+        toggleLock={(status) => {
+          message.success(status === 1 ? "上锁成功" : "解锁成功")
         }}
         checkIsMiniCIReady={checkIsMiniCIReady}
         isModify={beforeunload}
