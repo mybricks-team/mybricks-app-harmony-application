@@ -17,6 +17,7 @@ import axios from "axios";
 import { transformToJSON } from "@mybricks/render-utils";
 import { versionModel } from "./version";
 import dayjs from "dayjs";
+import { showSavesValidateConfirm } from "@/pages/index/modules/designer/modals";
 
 interface saveFilesResult {
   id: string;
@@ -559,7 +560,10 @@ class Content {
       projectContent,
     } = projectJson;
 
-    if (window.__type__ === "mpa" && type !== 'import') {
+    /** 是否是mpa，且用户手动点击的保存 */
+    const isMpaAndUserSave = window.__type__ === "mpa" && type !== 'import'
+
+    if (!pageModel.isInit && isMpaAndUserSave) {
       updatedPageAry = updatedPageAry.filter((updatedPage) => {
         const { id, type } = updatedPage;
         if (!type) {
@@ -569,6 +573,49 @@ class Content {
         }
         return true
       })
+    }
+
+    if (!pageModel.isInit && isMpaAndUserSave) {
+      const isLockPages = [];
+      const notLockPages = [];
+
+      if (contentModel.editRecord.global) {
+        if (!pageModel.globalOperable) {
+          notLockPages.push({
+            id: 'app',
+            title: '应用配置（全局、插件）',
+          })
+        } else {
+          isLockPages.push({
+            id: 'app',
+            title: '应用配置（全局、插件）',
+          })
+        }
+      }
+
+      updatedPageAry.map(p => ({
+        id: p.id,
+        title: p.title
+      })).forEach(page => {
+        if (pageModel.pages?.[page.id]) {
+          const pageFileId = pageModel.pages[page.id]?.fileId
+          if (pageModel.extraFiles?.[pageFileId]?.id === userModel.user?.id) {
+            isLockPages.push(page)
+          } else {
+            notLockPages.push(page)
+          }
+        } else {
+          // 用户自己新增的，所有认为默认上锁
+          isLockPages.push(page)
+        }
+      })
+
+      if (notLockPages.length) {
+        await showSavesValidateConfirm({
+          willSaves: isLockPages,
+          cannotSaves: notLockPages
+        })
+      }
     }
 
 
@@ -588,7 +635,7 @@ class Content {
     // console.log("pageModel.pages => ", pageModel.pages)
 
     // 找出新增的画布，写入pages,extraFiles
-    if (window.__type__ === "mpa" && type !== 'import') {
+    if (isMpaAndUserSave) {
       updatePagesResult.forEach((updatePage) => {
         const dumpPage = pageAry.find((page) => page.id === updatePage.id)
         if (dumpPage && !dumpPage.type) {

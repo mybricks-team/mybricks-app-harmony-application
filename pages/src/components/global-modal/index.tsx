@@ -21,6 +21,7 @@ function GModal() {
     ReactDOM.render(
       <Modal
         {...props}
+        className='fangzhou-theme'
         open={true}
         visible={true}
         onCancel={() => hide()}
