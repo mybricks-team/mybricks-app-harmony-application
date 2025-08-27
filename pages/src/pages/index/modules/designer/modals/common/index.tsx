@@ -106,13 +106,13 @@ export const showSavesValidateConfirm = ({
             <div className={styles.footer}>
               {willSaves.length > 0 ? (
                 <>
-                  <Button onClick={_reject}>取消</Button>
-                  <Button type="primary" style={{ marginLeft: 12 }} onClick={_resolve}>
+                  <Button size='small' onClick={_reject}>取消</Button>
+                  <Button size='small' type="primary" style={{ marginLeft: 12 }} onClick={_resolve}>
                     好的，仅保存已上锁内容
                   </Button>
                 </>
               ) : (
-                <Button onClick={_reject}>好的</Button>
+                <Button size='small' onClick={_reject}>好的</Button>
               )}
             </div>
           </div>
