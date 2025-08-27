@@ -6,35 +6,40 @@ const handleExtensionBusCode = (page, { params }) => {
 
   if (page.content.includes("MyBricks.")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../utils/types" : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? "../../utils/types" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["MyBricks"],
       importType: "named",
     });
   }
   if (page.content.includes("join")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["join"],
       importType: "named",
     });
   }
   if (page.content.includes("createVariable")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["createVariable"],
       importType: "named",
     });
   }
   if (page.content.includes("createFx")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["createFx"],
       importType: "named",
     });
   }
   if (page.content.includes("merge(")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? "../../utils/mybricks" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["merge"],
       importType: "named",
     });

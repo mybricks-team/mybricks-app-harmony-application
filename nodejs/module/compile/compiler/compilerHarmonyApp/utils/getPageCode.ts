@@ -67,12 +67,15 @@ const getPageCode = async (params, modulesData, result = { }) => {
     },
     getComponentPackageName(params) {
       if (params?.type === "extensionEvent") {
-        return download.source === "sourceCode" ? "./common/Index" : "./common/Index"
+        return "./common/Index"
+        // return download.source === "sourceCode" ? "./common/Index" : "./common/Index"
       }
-      return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "../common/Index"
+      return "../common/Index"
+      // return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "../common/Index"
     },
     getUtilsPackageName() {
-      return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "@mybricks/render-utils"
+      return "@mybricks/render-utils"
+      // return download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : "@mybricks/render-utils"
     },
     getPageId(id) {
       if (key === "app") {

@@ -6,28 +6,32 @@ const handleModuleCode = (page, { params, key }) => {
 
   if (page.content.includes("MyBricks.")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? "../../../utils/types" : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? "../../../utils/types" : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["MyBricks"],
       importType: "named",
     });
   }
   if (page.content.includes("join")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["join"],
       importType: "named",
     });
   }
   if (page.content.includes("Controller()")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["Controller"],
       importType: "named",
     });
   }
   if (page.content.includes("ModuleController()")) {
     page.importManager.addImport({
-      packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      // packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+      packageName: RENDER_UTILS_PACKAGE_NAME,
       dependencyNames: ["ModuleController"],
       importType: "named",
     });
@@ -48,7 +52,8 @@ const handleModuleCode = (page, { params, key }) => {
     }
   }
   page.importManager.addImport({
-    packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+    // packageName: download.source === "sourceCode" ? COMPONENT_PACKAGE_NAME : RENDER_UTILS_PACKAGE_NAME,
+    packageName: RENDER_UTILS_PACKAGE_NAME,
     dependencyNames: ["Styles", "MyBricksColumnModifier", "ColumnVisibilityController"],
     importType: "named",
   });

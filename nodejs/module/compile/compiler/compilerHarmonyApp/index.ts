@@ -32,7 +32,10 @@ const copyOhPackage = async (params, config) => {
         ",\n" + 
         '    "@mybricks/render-utils": "latest",\n' +
         '    "@mybricks/comlib-harmony-normal": "latest"'
-      ) : ""
+      ) : (
+        ",\n" + 
+        '    "@mybricks/render-utils": "latest",\n'
+      )
     ))
 }
 
@@ -41,7 +44,7 @@ const copyUtils = async (params, config) => {
   const { download } = data;
   const { targetPath } = config;
 
-  if (download.source !== "ohpmLibrary") {
+  if (download.source !== "ohpmLibrary" && false) {
     // 拷贝utils
     await fse.copy(path.join(__dirname, "./template/utils"), path.join(targetPath, "utils"), { overwrite: true })
   } else {
@@ -128,9 +131,10 @@ const handleApiCode = (params, config) => {
   const hasBus = code.includes("bus.")
   return code
     .replace("$r('app.api.import.utils')",
-      download.source === "sourceCode" ?
-        `import { MyBricks } from "../../utils/types";\nimport { transformApi } from "../../utils/mybricks"\n;${hasBus ? 'import { bus } from "../app/bus";' : ""}` :
-        `import { MyBricks, transformApi } from "@mybricks/render-utils";${hasBus ? '\nimport { bus } from "../app/bus";' : ""}`
+      `import { MyBricks, transformApi } from "@mybricks/render-utils";${hasBus ? '\nimport { bus } from "../app/bus";' : ""}`
+      // download.source === "sourceCode" ?
+      //   `import { MyBricks } from "../../utils/types";\nimport { transformApi } from "../../utils/mybricks"\n;${hasBus ? 'import { bus } from "../app/bus";' : ""}` :
+      //   `import { MyBricks, transformApi } from "@mybricks/render-utils";${hasBus ? '\nimport { bus } from "../app/bus";' : ""}`
     );
 }
 

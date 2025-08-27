@@ -23,7 +23,7 @@ const getUsedComponent = (params) => {
       const componentName = asImportName.replace("Basic", "");
       const { hasSlots } = componentMetaMap[namespace]
       declaredComponentCode += `@Builder
-      export function ${componentName} (params: MyBricksComponentBuilderParams) {
+      function ${componentName}Builder (params: MyBricksComponentBuilderParams) {
         ${asImportName}({
           uid: params.uid,
           data: createData(params, ${importData}),
@@ -31,12 +31,27 @@ const getUsedComponent = (params) => {
           outputs: createEventsHandle(params),
           styles: createStyles(params),
           ${hasSlots ? "slots: params.slots," : ""}
-          ${hasSlots ? "slotsIO: params.slotsIO," : ""}
+          ${hasSlots ? "slotsIO: createSlotsIO(params)," : ""}
           parentSlot: params.parentSlot,
           env,
           _env,
           modifier: createModifier(params, CommonModifier)
         })
+      }
+
+      @Builder
+      export function ${componentName} (params: MyBricksComponentBuilderParams) {
+        if (params.parentSlot?.itemWrap) {
+          params.parentSlot.itemWrap({
+            id: params.uid,
+            inputs: params.controller?._inputEvents
+          }).wrap.builder(wrapBuilder(${componentName}Builder), params, params.parentSlot.itemWrap({
+            id: params.uid,
+            inputs: params.controller?._inputEvents
+          }).params)
+        } else {
+          ${componentName}Builder(params)
+        }
       }
       \n`
     } else {
