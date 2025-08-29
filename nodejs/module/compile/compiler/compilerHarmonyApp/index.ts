@@ -92,7 +92,7 @@ const copyCommon = (params, config) => {
       (fse.readFileSync(path.join(__dirname, "./template/common/IndexOhpmLibrary.ets"), 'utf-8'))
         .replace(
           "{ domain: undefined }",
-          `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
+          `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined} }`,
         )
     );
   } else {
@@ -102,7 +102,7 @@ const copyCommon = (params, config) => {
       (fse.readFileSync(path.join(__dirname, "./template/common/Index.ets"), 'utf-8'))
         .replace(
           "{ domain: undefined }",
-          `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined}}`,
+          `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined} }`,
         )
         .replace("$r('app.common.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
         .replace("$r('app.common.component.declared')", declaredComponentCode)
@@ -237,8 +237,8 @@ const compilerHarmonyApp = async (params, config) => {
       if (page.type === "extension-config") {
         // 配置
         apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.config')", `(value: MyBricks.Any) => {
-          ${page.content}
-        }`);
+  ${page.content}
+}`);
         return
       }
 

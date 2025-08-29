@@ -11,22 +11,24 @@ const getPageCode = async (params, modulesData, result = { }) => {
   const usedComponentsMap = {};
   const usedModuleIds = new Set();
   const pageCode = toHarmonyCode(toJson, {
-    getComponentMetaByNamespace(namespace, config) {
+    getComponentMeta(com, config) {
+      const { namespace, rtType } = com.def;
       if (namespace.startsWith("mybricks.harmony.module")) {
         const { moduleId, pageId } = getModuleInfoByNamespace(namespace);
         usedModuleIds.add(moduleId);
         const { moduleName, sceneIdToName } = modulesData[moduleId];
 
-        if (config.type === "js") {
+        if (rtType?.match(/^js/gi)) {
           const componentName = `${moduleName}Api`
 
           return {
-            dependencyImport: {
-              packageName: `../../${moduleName}/api`,
-              dependencyNames: [`api as ${componentName}`],
-              importType: "named",
+            importInfo: {
+              from: `../../${moduleName}/api`,
+              name: `api as ${componentName}`,
+              type: "named",
             },
-            componentName,
+            name: componentName,
+            callName: componentName,
           }
         }
 
@@ -34,35 +36,54 @@ const getPageCode = async (params, modulesData, result = { }) => {
         const componentName = `${firstCharToUpperCase(moduleName)}${sectionName}`
 
         return {
-          dependencyImport: {
-            packageName: `../../${moduleName}/sections/Index`,
-            dependencyNames: [`${sectionName} as ${componentName}`],
-            importType: "named",
+          importInfo: {
+            from: `../../${moduleName}/sections/Index`,
+            name: `${sectionName} as ${componentName}`,
+            type: "named",
           },
-          componentName,
+          name: componentName,
+          callName: componentName,
+        }
+      }
+
+      if (["mybricks.core-comlib.js-ai", "mybricks.harmony._muilt-inputJs"].includes(namespace)) {
+        return {
+          importInfo: {
+            name: "jsModules",
+            from: ["extension-config", "extension-api", "extension-bus", "extension-event"].includes(config?.json?.type) ? 
+              "./common/Index" :
+              COMPONENT_PACKAGE_NAME,
+            type: "named",
+          },
+          name: "jsModules",
+          callName: `jsModules.${com.id}`
         }
       }
 
       if (!usedComponentsMap[namespace]) {
-        usedComponentsMap[namespace] = config;
+        usedComponentsMap[namespace] = com;
       }
 
       let componentName = convertNamespaceToComponentName(namespace);
-      const dependencyNames: string[] = [];
 
-      if (config.type === "js") {
+      if (rtType?.match(/^js/gi)) {
         componentName = componentName[0].toLowerCase() + componentName.slice(1);
       }
 
-      dependencyNames.push(componentName);
-
       return {
-        dependencyImport: {
-          packageName: download.source === "sourceCode" ? (config.source === "extensionEvent" ? "./common/Index" : COMPONENT_PACKAGE_NAME) : "@mybricks/comlib-harmony-normal",
-          dependencyNames,
-          importType: "named",
+        importInfo: {
+          from: download.source === "sourceCode" ? 
+            (
+              ["extension-config", "extension-api", "extension-bus", "extension-event"].includes(config?.json?.type) ? 
+                "./common/Index" :
+                COMPONENT_PACKAGE_NAME
+            ) : 
+            "@mybricks/comlib-harmony-normal",
+          name: componentName,
+          type: "named",
         },
-        componentName: componentName,
+        name: componentName,
+        callName: componentName,
       };
     },
     getComponentPackageName(params) {

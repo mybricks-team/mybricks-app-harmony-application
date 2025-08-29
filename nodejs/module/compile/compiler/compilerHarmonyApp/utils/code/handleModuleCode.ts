@@ -58,9 +58,8 @@ const handleModuleCode = (page, { params, key }) => {
     importType: "named",
   });
   return `${page.importManager.toCode()}
-
-      ${page.content}
-      `;
+${page.content}
+`;
 }
 
 export default handleModuleCode;

@@ -52,22 +52,21 @@ const handlePopupCode = (page, { params, key }) => {
     }
   }
   return `${page.importManager.toCode()}
+/** ${page.meta.title} */
+@ComponentV2
+export default struct Page {
+  build() {
+    NavDestination() {
+      Index()
+    }
+    .hideTitleBar(true)
+    .mode(NavDestinationMode.DIALOG)
+    .systemTransition(NavigationSystemTransitionType.NONE)
+  }
+}
 
-      /** ${page.meta.title} */
-      @ComponentV2
-      export default struct Page {
-        build() {
-          NavDestination() {
-            Index()
-          }
-          .hideTitleBar(true)
-          .mode(NavDestinationMode.DIALOG)
-          .systemTransition(NavigationSystemTransitionType.NONE)
-        }
-      }
-  
-      ${page.content}
-      `;
+${page.content}
+`;
 }
 
 export default handlePopupCode

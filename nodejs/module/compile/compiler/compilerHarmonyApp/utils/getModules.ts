@@ -2,6 +2,22 @@ import API from "@mybricks/sdk-for-app/api"
 import generateFileName from "./generateFileName"
 import { firstCharToLowerCase } from "./string"
 
+const transformComs = (coms) => {
+  Object.entries(coms).forEach(([key, com]: any) => {
+    if (["mybricks.core-comlib.js-ai", "mybricks.harmony._muilt-inputJs"].includes(com.def.namespace)) {
+      if (!("runImmediate" in com.model.data)) {
+        com.model.data = {
+          runImmediate: false,
+        }
+      } else {
+        com.model.data = {
+          runImmediate: com.model.data.runImmediate
+        }
+      }
+    }
+  })
+}
+
 const getModules = async (installedModules) => {
   const modulesData = {};
 
@@ -17,6 +33,12 @@ const getModules = async (installedModules) => {
         // 区块将被作为组件使用
         sceneIdToName[scene.id] = firstCharToLowerCase(generateFileName(scene.title))
       }
+
+      transformComs(scene.coms);
+    })
+
+    module.data.toJson.global.fxFrames.forEach((fxFrame) => {
+      transformComs(fxFrame.coms);
     })
 
     const extensionConfigFrame = module.data.toJson.global.fxFrames.find((frame) => {

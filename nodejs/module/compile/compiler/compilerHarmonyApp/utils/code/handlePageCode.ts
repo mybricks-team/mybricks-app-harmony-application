@@ -71,7 +71,6 @@ const handlePageCode = (page, {
         importType: "named",
       });
       return `${page.importManager.toCode()}
-
 /** ${page.meta.title} */
 @ComponentV2
 export default struct Page {
@@ -99,7 +98,6 @@ ${page.content}
         importType: "named",
       });
       return `${page.importManager.toCode()}
-
 /** ${page.meta.title} */
 @ComponentV2
 export default struct Page {
@@ -120,7 +118,6 @@ ${page.content}
     }
     case 'none': {
       return `${page.importManager.toCode()}
-
 /** ${page.meta.title} */
 @ComponentV2
 export default struct Page {

@@ -197,6 +197,10 @@ export const getAllModulesJsCode = async (pages, plugins, options = {}) => {
           delete jsonComs[key].model.data.inputSchema;
           delete jsonComs[key].model.data.extraLib;
           delete jsonComs[key].model.data.fns;
+
+          if (!("runImmediate" in jsonComs[key].model.data)) {
+            jsonComs[key].model.data.runImmediate = false;
+          }
         }
 
         // 解析 AI组件

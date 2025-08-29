@@ -3,11 +3,13 @@ const getUsedComponent = (params) => {
   let importComponentCode = "";
   let declaredComponentCode = "";
 
-  Object.entries(usedComponentsMap).forEach(([namespace, config]: any) => {
+  Object.entries(usedComponentsMap).forEach(([namespace, com]: any) => {
     const namespaceSplit = namespace.split(".")
 
     const importName = namespaceSplit.join("_");
-    const asImportName = (config.type === "ui" ? "Basic" : "basic") + namespaceSplit.map((text) => {
+    const isUI = !com.def.rtType;
+    
+    const asImportName = (isUI ? "Basic" : "basic") + namespaceSplit.map((text) => {
       if (text.toUpperCase() === "MYBRICKS") {
         return "MyBricks";
       }
@@ -16,8 +18,7 @@ const getUsedComponent = (params) => {
     }).join("")
 
     importComponentCode += `${importName} as ${asImportName},`
-
-    if (config.type === "ui") {
+    if (isUI) {
       const importData = importName + "_Data";
       importComponentCode += `${importData},`
       const componentName = asImportName.replace("Basic", "");
