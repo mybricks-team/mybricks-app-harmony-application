@@ -104,7 +104,7 @@ const copyCommon = (params, config) => {
           "{ domain: undefined }",
           `{ domain: ${appConfig?.defaultCallServiceHost ? JSON.stringify(appConfig?.defaultCallServiceHost) : undefined} }`,
         )
-        .replace("$r('app.common.component.import')", importComponentCode ? `import { ${importComponentCode} } from "../../../comlib/Index"` : "")
+        .replace("$r('app.common.component.import')", importComponentCode ? `import {\n${importComponentCode}} from "../../../comlib/Index"` : "")
         .replace("$r('app.common.component.declared')", declaredComponentCode)
     );
   }
