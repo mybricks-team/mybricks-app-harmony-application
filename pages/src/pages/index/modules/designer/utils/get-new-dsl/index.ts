@@ -1,6 +1,6 @@
 
 import { checkValueType, getValidSlotStyle, getValidSizeValue, transformToValidBackground, transformToValidStyleAry, fixCompileErrorStyle, uuid } from './helper'
-export { getDSLPrompts, getSystemPrompts, getExamplePromptsAtFirst } from './prompt'
+export { getDSLPrompts, getSystemPrompts, getExamplePromptsAtFirst, getSystemAppendPrompts } from './prompt'
 
 /**
  * @description Json遍历器，支持对不同类型的节点注册修改函数
