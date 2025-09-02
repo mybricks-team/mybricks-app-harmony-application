@@ -262,7 +262,7 @@ const compilerHarmonyApp = async (params, config) => {
 
 
       if (page.meta) {
-        const pageName = page.name + "Page";
+        const pageName = page.name;
 
         let pushNormalScenes = true
 
@@ -306,7 +306,7 @@ const compilerHarmonyApp = async (params, config) => {
         content = handlePopupCode(page, { params, key });
       }
 
-      fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/pages/${page.name}Page.ets`), content, { encoding: "utf8" })
+      fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/pages/${page.name}.ets`), content, { encoding: "utf8" })
     });
 
     apiCode = apiCode.replace("$r('app.api.apis')", extensionApiCode).replace("$r('app.api.import')", "").replace("$r('app.api.config')", "() => {}");
