@@ -349,7 +349,7 @@ class Content {
     return {
       toJsonPages: Object.values(pages).map((json) => {
         return toJSONFromPageDump(JSON.stringify(json), {
-          forMPA: true,
+          // forMPA: true,
         });
       }),
       dumpJsonPages: Object.values(pages).map((json) => {
