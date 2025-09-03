@@ -4,7 +4,7 @@ import API from "@mybricks/sdk-for-app/api";
 import cloneDeep from "lodash/cloneDeep";
 import _flatten from "lodash/flatten";
 import { message } from "antd";
-import { toJSONFromPageDump } from "../utils/file-parser";
+import { toJSONFromPageDump } from "../utils/file-parser-next";
 import {
   ToJsonSchema,
   DumpMetaJson,
