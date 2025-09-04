@@ -21,6 +21,8 @@ import { LoadingOutlined } from '@ant-design/icons'
 import { globalModal } from '@/components'
 import { pageModel, userModel } from '@/stores'
 
+import { done,error } from '../../utils/icons'
+
 import styles from './index.less'
 
 export const showPublishLoading = ({ text }) => {
@@ -70,16 +72,17 @@ export const showSavesValidateConfirm = ({
       width: 420,
       closable: true,
       maskClosable: true,
+      style: {borderRadius: 14},
       children: (
         <div className="fangzhou-theme">
           <div className={styles.saveValidates}>
-            <h2>请注意</h2>
             {Array.isArray(willSaves) && !!willSaves.length && (
               <div className={styles.willSaves}>
                 <div className={styles.subTitle}>即将为您保存以下内容</div>
                 {(willSaves ?? []).map(({ id, title }, index) => (
-                  <div key={id} className={styles.name}>
-                    - {title}
+                  <div key={id} className={styles.item}>
+                      <img src={done} alt="" style={{width:"14px",height:"14px",marginRight:"4px"}}/>
+                      <div className={styles.name}>{title}</div>
                   </div>
                 ))}
               </div>
@@ -87,16 +90,17 @@ export const showSavesValidateConfirm = ({
             {Array.isArray(cannotSaves) && !!cannotSaves.length && (
               <div className={styles.cannotSaves}>
                 <div className={styles.subTitle}>
-                  检测到以下内容无法保存，请上锁后再点击保存
+                  以下内容无法保存，请上锁后再试
                 </div>
                 <div>
                   {(cannotSaves ?? []).map(({ id, title }, index) => (
-                    <div key={id} className={styles.name}>
-                      - {title}
+                    <div key={id} className={styles.item}>
+                      <img src={error} alt="" style={{width:"14px",height:"14px",marginRight:"4px"}} />
+                      <div className={styles.name}>{title}</div>
                       <span className={styles.reason}>
                         {id === 'app'
                           ? '请点击右上角头像上锁'
-                          : '请点击左上角画布和区块申请权限'}
+                          : '请点击左侧画布和区块菜单上锁'}
                       </span>
                     </div>
                   ))}

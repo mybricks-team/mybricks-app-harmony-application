@@ -5,15 +5,31 @@
 .notification {
   font-size: 12px;
 
-  .name {
-    margin-top: 5px;
-    margin-left: 12px;
+  .title {
+    font-weight: 500;
+    font-size: 15px;
+    color: #303030;
+  }
+
+  .item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 9px;
+    .name {
+      color: #FA6400;
+      font-weight: 500;
+    }
 
     .reason {
-      color: #faad14;
-      font-style: italic;
-      font-size: 11px;
-      margin-left: 12px;
+      color: #303030;
+      font-weight: 500;
+      margin-left: 10px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
     }
   }
+
+
 }

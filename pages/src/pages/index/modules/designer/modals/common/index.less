@@ -20,42 +20,90 @@
     // font-weight: 500;
   }
 
-  .name {
-    margin-bottom: 4px;
-    // font-size: 13px;
-    font-size: 12px;
-    margin-left: 12px;
-  }
+
+
 
   .willSaves {
+    margin-bottom: 15px;
     .subTitle {
       // color: #16A157;
+      font-weight: 500;
+      font-size: 15px;
+      color: #303030;
     }
- 
+
     .name {
       // color: #16A157;
+    }
+
+  .item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-top: 9px;
+      font-size: 12px;
+
+      .name {
+        color: #303030;
+        font-weight: normal;
+      }
+
+      .reason {
+        color: #303030;
+        font-weight: 500;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
     }
   }
 
   .cannotSaves {
     .subTitle {
       // color: #faad14;
+      font-weight: 500;
+      font-size: 15px;
+      color: #303030;
     }
 
     .name {
       // color: red;
     }
+
+    .item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-top: 9px;
+      font-size: 12px;
+
+      .name {
+        color: #FA6400;
+        font-weight: 500;
+      }
+
+      .reason {
+        color: #303030;
+        font-weight: normal;
+        margin-left: 10px;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+      }
+    }
   }
 
   .reason {
-    color: #faad14;
-    font-style: italic;
-    // font-size: 12px;
-    font-size: 11px;
-    margin-left: 12px;
+    color: #303030;
+    font-weight: 500;
+    margin-left: 10px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
   }
 
-  
+
   .footer {
     display: flex;
     justify-content: flex-end;
