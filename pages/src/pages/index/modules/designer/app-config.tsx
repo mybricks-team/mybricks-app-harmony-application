@@ -292,171 +292,195 @@ export default function ({
             ]
           },
           {
-            title: "接口默认域名",
-            description:
-              "接口允许单独配置域名。如未设置特定域名，则默认使用预设域名；若已配置特定域名，则会优先使用您所设定的域名。",
-            type: "array",
+            title: '服务接口域名',
+            description: '此域名会补全服务接口中配置相对路径的接口',
+            type: 'textarea',
             options: {
-              getTitle: (item) => {
-                return (
-                  <div
-                    style={{
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      whiteSpace: "nowrap",
-                      lineHeight: "30px",
-                    }}
-                    title={item.host}
-                  >
-                    {item.host || "未设置"}
-                  </div>
-                );
-              },
-              items: [
-                {
-                  title: "域名",
-                  type: "text",
-                  value: "host",
-                },
-              ],
-              editable: false,
-              selectable: true,
-              onSelect(_id) {
-                let item = pageModel.appConfig.hostList.find((hostItem) => {
-                  return hostItem._id === _id;
-                });
-
-                if (!item) {
-                  return;
-                }
-
-                if (!item?.host) {
-                  window.antd.message.warn("请先设置域名");
-                  return;
-                }
-
-                window.antd.message.success(
-                  `默认域名已切换为: ${item.host}`
-                );
-                pageModel.appConfig.defaultCallServiceHost = item.host;
-              },
-              onRemove(_id) {
-                let item = pageModel.appConfig.hostList.find((hostItem) => {
-                  return hostItem._id === _id;
-                });
-
-                if (!item) {
-                  return;
-                }
-
-                if (
-                  item.host === pageModel.appConfig.defaultCallServiceHost
-                ) {
-                  pageModel.appConfig.defaultCallServiceHost = undefined;
-                }
-              },
-              customOptRender({ item, setList }) {
-                return (
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    {pageModel.appConfig.defaultCallServiceHost ===
-                      item.host &&
-                      item.host && (
-                        <div
-                          style={{
-                            fontSize: "9px",
-                            border: "1px solid #FA6400",
-                            borderRadius: "20px",
-                            color: "white",
-                            fontWeight: "700",
-                            backgroundColor: "#FA6400",
-                            padding: "2px 4px",
-                          }}
-                        >
-                          使用该域名
-                        </div>
-                      )}
-                    <div
-                      style={{
-                        margin: "3px 0px 3px 5px",
-                        height: "22px",
-                        width: "22px",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                      }}
-                      onClick={(e) => {
-                        e.stopPropagation();
-
-                        const host = window.prompt(
-                          "请输入域名，使用 https:// 或 http:// 开头",
-                          item.host
-                        );
-
-                        // 校验域名
-                        if (host && !/^https?:\/\/.*/.test(host)) {
-                          alert("请输入正确的域名");
-                          return;
-                        }
-
-                        // 重复域名校验
-                        if (
-                          host &&
-                          pageModel.appConfig.hostList.find(
-                            (hostItem) => hostItem.host === host
-                          )
-                        ) {
-                          alert("域名已存在");
-                          return;
-                        }
-
-                        if (host) {
-                          setList((c) =>
-                            c.map((t) => {
-                              if (t._id === item._id) {
-                                return {
-                                  ...t,
-                                  host,
-                                };
-                              }
-                              return t;
-                            })
-                          );
-                        }
-                      }}
-                    >
-                      <svg viewBox="0 0 1024 1024" width="15" height="15">
-                        <path
-                          d="M341.108888 691.191148 515.979638 616.741529 408.633794 511.126097 341.108888 691.191148Z"
-                          p-id="5509"
-                        ></path>
-                        <path
-                          d="M860.525811 279.121092 749.7171 164.848489 428.544263 481.69274 543.68156 601.158622 860.525811 279.121092Z"
-                          p-id="5510"
-                        ></path>
-                        <path
-                          d="M951.813934 142.435013c0 0-29.331026-32.462343-63.091944-57.132208-33.759895-24.670889-59.729359 0-59.729359 0l-57.132208 57.132208 115.996874 115.565039c0 0 48.909943-49.342802 63.957661-66.222237C966.861652 174.897356 951.813934 142.435013 951.813934 142.435013L951.813934 142.435013z"
-                          p-id="5511"
-                        ></path>
-                        <path
-                          d="M802.174845 946.239985 176.165232 946.239985c-61.635779 0-111.786992-50.151213-111.786992-111.786992L64.37824 208.443379c0-61.635779 50.151213-111.786992 111.786992-111.786992l303.856449 0c12.357446 0 22.357194 10.011005 22.357194 22.357194s-9.999748 22.357194-22.357194 22.357194L176.165232 141.370775c-36.986379 0-67.072605 30.086226-67.072605 67.072605l0 626.009613c0 36.986379 30.086226 67.072605 67.072605 67.072605l626.009613 0c36.985356 0 67.072605-30.086226 67.072605-67.072605L869.24745 530.596544c0-12.347213 9.999748-22.357194 22.357194-22.357194s22.357194 10.011005 22.357194 22.357194l0 303.856449C913.961838 896.088772 863.810624 946.239985 802.174845 946.239985z"
-                          p-id="5512"
-                        ></path>
-                      </svg>
-                    </div>
-                  </div>
-                );
-              },
+              placeholder: '使用 https:// 或 http:// 开头',
             },
-
             value: {
-              get({ data, focusArea }) {
-                return pageModel.appConfig.hostList;
+              get: () => {
+                return pageModel.appConfig.defaultCallServiceHost;
               },
-              set({ data, focusArea, output, input, ...res }, value) {
-                pageModel.appConfig.hostList = value;
+              set: (_, val) => {
+                if (!val) {
+                  pageModel.appConfig.hostList = []
+                } else {
+                  pageModel.appConfig.hostList = [{
+                    _id: 'u_sdsd',
+                    host: val
+                  }]
+                }
+                pageModel.appConfig.defaultCallServiceHost = val;
               },
-            },
+            }
           },
+          // {
+          //   title: "接口默认域名",
+          //   description:
+          //     "接口允许单独配置域名。如未设置特定域名，则默认使用预设域名；若已配置特定域名，则会优先使用您所设定的域名。",
+          //   type: "array",
+          //   options: {
+          //     getTitle: (item) => {
+          //       return (
+          //         <div
+          //           style={{
+          //             overflow: "hidden",
+          //             textOverflow: "ellipsis",
+          //             whiteSpace: "nowrap",
+          //             lineHeight: "30px",
+          //           }}
+          //           title={item.host}
+          //         >
+          //           {item.host || "未设置"}
+          //         </div>
+          //       );
+          //     },
+          //     items: [
+          //       {
+          //         title: "域名",
+          //         type: "text",
+          //         value: "host",
+          //       },
+          //     ],
+          //     editable: false,
+          //     selectable: true,
+          //     onSelect(_id) {
+          //       let item = pageModel.appConfig.hostList.find((hostItem) => {
+          //         return hostItem._id === _id;
+          //       });
+
+          //       if (!item) {
+          //         return;
+          //       }
+
+          //       if (!item?.host) {
+          //         window.antd.message.warn("请先设置域名");
+          //         return;
+          //       }
+
+          //       window.antd.message.success(
+          //         `默认域名已切换为: ${item.host}`
+          //       );
+          //       pageModel.appConfig.defaultCallServiceHost = item.host;
+          //     },
+          //     onRemove(_id) {
+          //       let item = pageModel.appConfig.hostList.find((hostItem) => {
+          //         return hostItem._id === _id;
+          //       });
+
+          //       if (!item) {
+          //         return;
+          //       }
+
+          //       if (
+          //         item.host === pageModel.appConfig.defaultCallServiceHost
+          //       ) {
+          //         pageModel.appConfig.defaultCallServiceHost = undefined;
+          //       }
+          //     },
+          //     customOptRender({ item, setList }) {
+          //       return (
+          //         <div style={{ display: "flex", alignItems: "center" }}>
+          //           {pageModel.appConfig.defaultCallServiceHost ===
+          //             item.host &&
+          //             item.host && (
+          //               <div
+          //                 style={{
+          //                   fontSize: "9px",
+          //                   border: "1px solid #FA6400",
+          //                   borderRadius: "20px",
+          //                   color: "white",
+          //                   fontWeight: "700",
+          //                   backgroundColor: "#FA6400",
+          //                   padding: "2px 4px",
+          //                 }}
+          //               >
+          //                 使用该域名
+          //               </div>
+          //             )}
+          //           <div
+          //             style={{
+          //               margin: "3px 0px 3px 5px",
+          //               height: "22px",
+          //               width: "22px",
+          //               display: "flex",
+          //               alignItems: "center",
+          //               justifyContent: "center",
+          //             }}
+          //             onClick={(e) => {
+          //               e.stopPropagation();
+
+          //               const host = window.prompt(
+          //                 "请输入域名，使用 https:// 或 http:// 开头",
+          //                 item.host
+          //               );
+
+          //               // 校验域名
+          //               if (host && !/^https?:\/\/.*/.test(host)) {
+          //                 alert("请输入正确的域名");
+          //                 return;
+          //               }
+
+          //               // 重复域名校验
+          //               if (
+          //                 host &&
+          //                 pageModel.appConfig.hostList.find(
+          //                   (hostItem) => hostItem.host === host
+          //                 )
+          //               ) {
+          //                 alert("域名已存在");
+          //                 return;
+          //               }
+
+          //               if (host) {
+          //                 setList((c) =>
+          //                   c.map((t) => {
+          //                     if (t._id === item._id) {
+          //                       return {
+          //                         ...t,
+          //                         host,
+          //                       };
+          //                     }
+          //                     return t;
+          //                   })
+          //                 );
+          //               }
+          //             }}
+          //           >
+          //             <svg viewBox="0 0 1024 1024" width="15" height="15">
+          //               <path
+          //                 d="M341.108888 691.191148 515.979638 616.741529 408.633794 511.126097 341.108888 691.191148Z"
+          //                 p-id="5509"
+          //               ></path>
+          //               <path
+          //                 d="M860.525811 279.121092 749.7171 164.848489 428.544263 481.69274 543.68156 601.158622 860.525811 279.121092Z"
+          //                 p-id="5510"
+          //               ></path>
+          //               <path
+          //                 d="M951.813934 142.435013c0 0-29.331026-32.462343-63.091944-57.132208-33.759895-24.670889-59.729359 0-59.729359 0l-57.132208 57.132208 115.996874 115.565039c0 0 48.909943-49.342802 63.957661-66.222237C966.861652 174.897356 951.813934 142.435013 951.813934 142.435013L951.813934 142.435013z"
+          //                 p-id="5511"
+          //               ></path>
+          //               <path
+          //                 d="M802.174845 946.239985 176.165232 946.239985c-61.635779 0-111.786992-50.151213-111.786992-111.786992L64.37824 208.443379c0-61.635779 50.151213-111.786992 111.786992-111.786992l303.856449 0c12.357446 0 22.357194 10.011005 22.357194 22.357194s-9.999748 22.357194-22.357194 22.357194L176.165232 141.370775c-36.986379 0-67.072605 30.086226-67.072605 67.072605l0 626.009613c0 36.986379 30.086226 67.072605 67.072605 67.072605l626.009613 0c36.985356 0 67.072605-30.086226 67.072605-67.072605L869.24745 530.596544c0-12.347213 9.999748-22.357194 22.357194-22.357194s22.357194 10.011005 22.357194 22.357194l0 303.856449C913.961838 896.088772 863.810624 946.239985 802.174845 946.239985z"
+          //                 p-id="5512"
+          //               ></path>
+          //             </svg>
+          //           </div>
+          //         </div>
+          //       );
+          //     },
+          //   },
+
+          //   value: {
+          //     get({ data, focusArea }) {
+          //       return pageModel.appConfig.hostList;
+          //     },
+          //     set({ data, focusArea, output, input, ...res }, value) {
+          //       pageModel.appConfig.hostList = value;
+          //     },
+          //   },
+          // },
           {
             title: "H5 配置",
             items: [
