@@ -25,6 +25,8 @@ import { done,error } from '../../utils/icons'
 
 import styles from './index.less'
 
+import classNames from 'classnames'
+
 export const showPublishLoading = ({ text }) => {
   globalModal.show({
     // title: '🎉 ',
@@ -110,13 +112,16 @@ export const showSavesValidateConfirm = ({
             <div className={styles.footer}>
               {willSaves.length > 0 ? (
                 <>
-                  <Button size='small' onClick={_reject}>取消</Button>
+                <div className={styles.button} onClick={_reject} style={{marginRight:12}}>取消</div>
+                <div className={classNames(styles.button,styles.main_button)} onClick={_resolve}>好的，仅保存已上锁内容</div>
+                  {/* <Button size='small' onClick={_reject}>取消</Button>
                   <Button size='small' type="primary" style={{ marginLeft: 12 }} onClick={_resolve}>
                     好的，仅保存已上锁内容
-                  </Button>
+                  </Button> */}
                 </>
               ) : (
-                <Button size='small' onClick={_reject}>好的</Button>
+                // <Button size='small' onClick={_reject}>好的</Button>
+                <div className={styles.button} onClick={_reject} style={{marginRight:12}}>好的</div>
               )}
             </div>
           </div>

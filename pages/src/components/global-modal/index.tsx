@@ -1,8 +1,10 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { Modal, ModalProps } from 'antd'
+import styles from "./index.less"
+import classNames from 'classnames'
 
-interface GModalProps extends ModalProps {}
+interface GModalProps extends ModalProps { }
 
 function GModal() {
   const container = document.createElement('div')
@@ -21,7 +23,7 @@ function GModal() {
     ReactDOM.render(
       <Modal
         {...props}
-        className='fangzhou-theme'
+        className={classNames('fangzhou-theme', styles.model)}
         open={true}
         visible={true}
         onCancel={() => hide()}
