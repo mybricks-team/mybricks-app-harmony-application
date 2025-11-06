@@ -46,8 +46,8 @@ const getUsedComponent = (params) => {
       (hasSlots ? `\n${indent2}slots: params.slots,` : "") +
       (hasSlots ? `\n${indent2}slotsIO: createSlotsIO(params),` : "") +
       `\n${indent2}parentSlot: params.parentSlot,` +
-      `\n${indent2}env,` +
-      `\n${indent2}_env,` +
+      `\n${indent2}env: createEnv(params),` +
+      `\n${indent2}_env: _createEnv(params),` +
       `\n${indent2}modifier: createModifier(params, CommonModifier)` +
       `\n${indent1}})` + 
       `\n}` +
@@ -70,8 +70,8 @@ const getUsedComponent = (params) => {
       let componentName = asImportName.replace("basic", "");
       componentName = componentName[0].toLowerCase() + componentName.slice(1);
       declaredComponentCode += `export const ${componentName} =` +
-      `\n${indent1}(props: MyBricks.JSParams): (...values: MyBricks.EventValue) => Record<string, MyBricks.EventValue> => {` +
-      `\n${indent2}return createJSHandle(${asImportName}, { props, env });` +
+      `\n${indent1}(props: MyBricks.JSParams, appContext: MyBricks.AppContext): (...values: MyBricks.EventValue) => Record<string, MyBricks.EventValue> => {` +
+      `\n${indent2}return createJSHandle(${asImportName}, { props, appContext });` +
       `\n${indent1}}\n\n`
     }
   })

@@ -179,8 +179,8 @@ export const getAllModulesJsCode = async (pages, plugins, options = {}) => {
           let content = `
             ;const js_${key} = ${decodeURIComponent(realJsCode)};
             const _execJs_${key} = _execJs(js_${key});
-            comModules['${key}'] = (props) => {
-              return createJSHandle(_execJs_${key}, { props, ...context })
+            comModules['${key}'] = (props, appContext) => {
+              return createJSHandle(_execJs_${key}, { props, appContext })
             }
           `;
 

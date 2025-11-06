@@ -111,13 +111,10 @@ const copyCommon = (params, config) => {
 }
 
 const copyJs = (params, config) => {
-  const { data } = params;
-  const { download } = data;
   const { targetPath, code } = config;
-
   const jsModulesPath = path.join(targetPath, "common/JSModules.ts");
   fse.ensureFileSync(jsModulesPath)
-  fse.writeFileSync(jsModulesPath, `export default function({ createJSHandle, context }) {
+  fse.writeFileSync(jsModulesPath, `export default function({ createJSHandle }) {
     const comModules = {};
     ${code};
     return comModules;
