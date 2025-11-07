@@ -51,6 +51,38 @@
       background: #FA6400;
     }
   }
+    .formItem {
+    position: relative;
+
+    .button {
+      outline: 0;
+      border: 1px solid rgba(0, 0, 0, 0.10196);
+      letter-spacing: 0;
+      padding: 3px 13px;
+      font-size: 12px;
+      line-height: 12px;
+      height: 24px;
+      position: relative;
+      background-color: #fff;
+      border-radius: 6px;
+      color: rgba(0, 0, 0, 0.9);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: transform 0.3s ease;
+
+      &:hover {
+        opacity: 0.9;
+      }
+    }
+  }
+  .fileNameError {
+    color: #ff4d4f;
+    font-size: 11px;
+    line-height: 1;
+    position: absolute;
+    top: 48px;
+    right: 0px;
+  }
   .footer {
     padding-top: 12px;
     display: flex;
@@ -104,5 +136,25 @@
     .listItem {
       margin-top: 5px;
     }
+  }
+}
+
+.targetDirectoryStatus1 {
+  display: flex;
+  align-items: center;
+  color: '#434343';
+
+  .span {
+    font-size: 12px;
+    margin-right: 8px;
+  }
+
+  .unlink {
+    text-decoration: line-through;
+    cursor: pointer;
+  }
+
+  svg {
+    cursor: pointer;
   }
 }

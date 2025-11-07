@@ -32,6 +32,7 @@ import { DESIGNER_STATIC_PATH, HARMONY_COM_LIB } from "../../../../constants";
 import { ExclamationCircleFilled, CheckCircleFilled } from "@ant-design/icons";
 import cloneDeep from "lodash/cloneDeep"
 import { initOperableTips } from "./initOperableTips";
+import { parse, modify, applyEdits } from "jsonc-parser";
 
 // message.success(
 //  "保存成功",
@@ -1149,6 +1150,7 @@ const Designer = ({ appData }) => {
 
    const onCompile = useCallback(
     async (params) => {
+      console.log("导出", params);
       const close = message.loading({
         key: 'download',
         content: '导出中...',
@@ -1311,20 +1313,97 @@ const Designer = ({ appData }) => {
           close()
           return;
         }
-        download({
-          type,
-          backEndProjectPath: data?.data?.backEndProjectPath,
-          filename: `${params.fileName}.zip`,
-        })
-          .then(() => {
-            message.success("导出完成")
+
+        if (!params.fse) {
+          download({
+            type,
+            backEndProjectPath: data?.data?.backEndProjectPath,
+            filename: `${params.fileName}.zip`,
           })
-          .catch(() => {
-            message.error("导出失败")
-          })
-          .finally(() => {
-            close()
-          })
+            .then(() => {
+              message.success("导出完成")
+              // 添加下载记录
+              axios.post(
+                "/api/harmony-application/addDownloadRecord",
+                {
+                  userId: userModel.user?.id,
+                  fileId: pageModel.fileId,
+                  content: {
+                    // 版本
+                    saveVersion: versionModel.file.version,
+                  }
+                }
+              );
+            })
+            .catch(() => {
+              message.error("导出失败")
+            })
+            .finally(() => {
+              close()
+            })
+        } else {
+          // console.log(params.fse)
+          // return
+          axios.get(`/api/harmony-application/download2?fileId=${pageModel.fileId}&type=${type}`)
+            .then(async ({ data: { data } }) => {
+              console.log("[data]", data)
+              async function deep(data, handle: FileSystemDirectoryHandle) {
+                if (data.type === "directory") {
+                  const nextHandle = await handle.getDirectoryHandle(data.fileName, {
+                    create: true,
+                  });
+
+                  if (data.children) {
+                    await Promise.all(data.children.map((children) => {
+                      return deep(children, nextHandle)
+                    }))
+                  }
+                } else if (data.type === "file") {
+                  const fileHandle = await handle.getFileHandle(data.fileName, { create: true });
+                  const writable = await fileHandle.createWritable();
+                  if (/\.(jpg|jpeg|png|gif|webp|svg|ico|bmp|tiff|avif)$/i.test(data.fileName)) {
+                    const res = await axios.get(
+                      `/api/harmony-application/getTmpFile?tmpPath=${data.content}`,
+                      {
+                        responseType: 'blob'
+                      }
+                    );
+                    await writable.write(res.data)
+                  } else {
+                    await writable.write(data.content);
+                  }
+                  await writable.close();
+                }
+              }
+
+              const time = new Date().getTime()
+              // await deep(data, params.fse)
+              await Promise.all(data.children.map((children) => {
+                return deep(children, params.fse)
+              }))
+              console.log("[download - 写文件耗时]", new Date().getTime() - time)
+
+              message.success("导出完成")
+              // 添加下载记录
+              axios.post(
+                "/api/harmony-application/addDownloadRecord",
+                {
+                  userId: userModel.user?.id,
+                  fileId: pageModel.fileId,
+                  content: {
+                    // 版本
+                    saveVersion: versionModel.file.version,
+                  }
+                }
+              );
+            })
+            .catch((e) => {
+              message.error(`导出失败: ${e.message || e.msg}！请重试`)
+            })
+            .finally(() => {
+              close()
+            })
+        }
       } catch (e) {
         message.error("导出失败")
         console.error("导出失败:", e);

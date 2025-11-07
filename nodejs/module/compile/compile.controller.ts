@@ -24,6 +24,7 @@ import { compilerHarmonyApp } from "./compiler";
 import publish from "./publish";
 import getModule from "./getModule";
 import loadPage from "./loadPage";
+import addDownloadRecord from "./addDownloadRecord";
 
 const tempFolderPath = path.resolve(__dirname, "../../.tmp"); //临时目录
 
@@ -357,5 +358,90 @@ export default class CompileController {
         stack: error?.stack,
       };
     }
+  }
+
+  @Get("download2")
+  async download2(
+    @Query("fileId") fileId: number,
+    @Query("type") type: string = "weapp",
+  ) {
+    fse.ensureDirSync(tempFolderPath);
+    const projectName = `project-${fileId}-build-${type}`;
+    const projectPath = path.resolve(tempFolderPath, `./${projectName}`);
+
+    function deep(dir) {
+      const basename = path.basename(dir);
+      const stat = fse.statSync(dir);
+
+      if (stat.isDirectory()) {
+        return {
+          type: 'directory',
+          fileName: basename,
+          children: fse.readdirSync(dir).map((name) => {
+            return deep(path.resolve(dir, name))
+          })
+        }
+      }
+
+      if (stat.isFile()) {
+        const isImage = /\.(jpg|jpeg|png|gif|webp|svg|ico|bmp|tiff|avif)$/i.test(basename);
+
+        return {
+          type: 'file',
+          fileName: basename,
+          content: isImage ? dir.replace(tempFolderPath, "") : fse.readFileSync(dir, 'utf-8'),
+        }
+      }
+    }
+    console.log("[projectPath]", projectPath)
+    const dirName = fse.readdirSync(projectPath)[0];
+    console.log("[dirName]", dirName)
+    const data = deep(path.resolve(projectPath, dirName))
+
+    return {
+      code: 1,
+      data
+    }
+  }
+
+
+  @Post("addDownloadRecord")
+  async addDownloadRecord(
+    @Body("userId") userId: string,
+    @Body("fileId") fileId: string,
+    @Body("content") content: any,
+  ) {
+    try {
+      await addDownloadRecord({
+        userId,
+        fileId,
+        content
+      })
+      return {
+        code: 1,
+        message: "添加下载记录成功",
+        data: {},
+      };
+    } catch (error) {
+      Logger.info("[addDownloadRecord] fail " + error.message, error);
+      return {
+        code: -1,
+        errCode: error.errCode,
+        message:
+          error?.message ||
+          (error.code ? `添加下载记录失败，错误码：${error.code}` : "添加下载记录失败"),
+        stack: error?.stack,
+      };
+    }
+  }
+
+  @Get("getTmpFile")
+  getTmpFile(
+    @Query("tmpPath") tmpPath: string,
+    @Res() res: Response,
+  ) {
+    const completeTmpPath = path.join(tempFolderPath, tmpPath);
+
+    fs.createReadStream(completeTmpPath).pipe(res);
   }
 }
