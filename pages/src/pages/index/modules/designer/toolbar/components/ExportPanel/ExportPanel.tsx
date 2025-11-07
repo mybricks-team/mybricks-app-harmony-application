@@ -192,8 +192,8 @@ const HarmonyRequireForm = ({ onCancel, onOk, getPopupContainer }) => {
           <div className={css.formItem}>
             <Form.Item
               name="moduleExportDirectory"
-              label="模块导出目录"
-              tooltip="配置目录后，导出模块将使用写文件覆盖的形式，不再下载zip包"
+              label="应用导出目录"
+              tooltip="配置目录后，导出应用将使用写文件覆盖的形式，不再下载zip包"
             >
               {targetDirectoryStatus.status === -1 && (
                 <button
