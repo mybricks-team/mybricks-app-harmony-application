@@ -29,7 +29,7 @@ const handleEntryCode = (template: string, {
       allImports += `\n/** ${title} 配置 */\n` + 
       `import { config as ${moduleName}Config } from '../modules/${moduleName}/api';`
 
-      executConfigs += `${moduleName}Config(${JSON.stringify(configs)});\n`
+      executConfigs += `${moduleName}Config(${Object.keys(configs).length ? JSON.stringify(configs) : ""});\n`
     }
   })
 

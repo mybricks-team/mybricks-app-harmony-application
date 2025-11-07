@@ -217,7 +217,7 @@ const compilerHarmonyApp = async (params, config) => {
     const { pageCode, moduleName, usedComponentsMap, data } = value;
     usedModuleNames.add(moduleName);
     const moduleNames = new Set<string>();
-    let apiCode = fse.readFileSync(path.join(__dirname, "./template/api.ets"), "utf-8");
+    let apiCode = "";
 
     let extensionApiCode = "";
 
@@ -231,18 +231,9 @@ const compilerHarmonyApp = async (params, config) => {
         return;
       }
 
-      if (page.type === "extension-config") {
-        // 配置
-        apiCode = apiCode.replace("$r('app.api.import')", page.importManager.toCode()).replace("$r('app.api.config')", `(value: MyBricks.Any) => {
-  ${page.content}
-}`);
-        return
-      }
-
-      if (page.type === "extension-api") {
-        // API
-        extensionApiCode = extensionApiCode + page.content
-        return
+      if (page.type === "api") {
+        apiCode = `${page.importManager.toCode()}\n${page.content}`
+        return;
       }
 
       if (page.type === "global") {
@@ -305,8 +296,6 @@ const compilerHarmonyApp = async (params, config) => {
 
       fse.outputFileSync(path.join(targetEtsPath, `modules/${moduleName}/pages/${page.name}.ets`), content, { encoding: "utf8" })
     });
-
-    apiCode = apiCode.replace("$r('app.api.apis')", extensionApiCode).replace("$r('app.api.import')", "").replace("$r('app.api.config')", "() => {}");
 
     if (moduleNames.size) {
       // 有区块，补充区块的入口文件
