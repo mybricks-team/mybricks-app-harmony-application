@@ -37,6 +37,8 @@ const getModules = async (installedModules) => {
       transformComs(scene.coms);
     })
 
+    transformComs(module.data.toJson.global.comsReg || {})
+
     module.data.toJson.global.fxFrames.forEach((fxFrame) => {
       transformComs(fxFrame.coms);
     })
