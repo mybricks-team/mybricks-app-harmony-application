@@ -681,6 +681,16 @@ export default function ({
       width: 375,
       height: 667,
       toolbarContainer: '#sdk_toolbar_center',
+      useBreakpoints: [
+        {
+          title: '双屏',
+          width: 720,
+        },
+        {
+          title: '三联屏',
+          width: 1080,
+        }
+      ],
       theme: {
         css: [
           "./public/brickd-mobile/0.0.53/index.css",
