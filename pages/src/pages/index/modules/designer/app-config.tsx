@@ -26,6 +26,7 @@ import { message } from "antd";
 import { CompileType } from "@/types";
 import { getPageTitlePrefix, isDesignFilePlatform } from '@/utils'
 import { myRequire } from "@/utils/comlib"
+import AIPlugin from './utils/get-ai-plugin'
 // import  AICom  from "../../../../../public/ai-com"
 // import typeConfig from "./configs/type";
 // import { PcEditor } from "/Users/stuzhaoxing-office/Program/editors-pc-common/src/index";
@@ -86,6 +87,9 @@ export default function ({
   setOperable,
 }) {
   // console.log("应用设置: ", appConfig);
+  const aiViewConfig = getAiView(true, {
+    model: DEFAULT_AI_MODEL,
+  })
   return {
     type: window.__type__,
     shortcuts: {
@@ -199,6 +203,17 @@ export default function ({
         dump: contentModel.dump,
         loadContent: (importData) => contentModel.loadContent(importData, ctx),
       }),
+       AIPlugin({
+        key: pageModel?.fileId,
+        user: {
+          name: appData.user.name || appData.user.email || "user",
+          avatar: appData.user.avatar
+        },
+        // requestAsStream
+        requestAsStream: ({ messages, emits, aiRole }) => {
+          return aiViewConfig.requestAsStream(messages, undefined, emits, { aiRole });
+        }
+      })
       // VarBind(),
     ],
     // comLibLoader: comlibLoader(ctx),
@@ -925,9 +940,7 @@ export default function ({
     // aiView: getAiView(appConfig?.publishLocalizeConfig?.enableAI, {
     //   model: appConfig?.publishLocalizeConfig?.selectAIModel
     // }), // TODO: 开发settings页面后再放开注释
-    aiView: getAiView(true, {
-      model: DEFAULT_AI_MODEL,
-    }),
+    aiView: aiViewConfig,
     com: {
       env: {
         callConnector(connector, params, connectorConfig, env) {
