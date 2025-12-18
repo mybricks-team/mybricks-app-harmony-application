@@ -1272,7 +1272,7 @@ export function mergeEditorOptions(
   return options;
 }
 
-const DEFAULT_MODEL = 'deepseek-chat';
+const DEFAULT_MODEL = 'google/gemini-3-flash-preview';
 function getDesignerParams(args) {
   let context = args[0];
   let tools = undefined;
