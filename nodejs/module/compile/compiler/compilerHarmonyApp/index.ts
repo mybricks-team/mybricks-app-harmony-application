@@ -34,7 +34,8 @@ const copyOhPackage = async (params, config) => {
         '    "@mybricks/comlib-harmony-normal": "latest"'
       ) : (
         ",\n" + 
-        '    "@mybricks/render-utils": "latest",\n'
+        '    "@mybricks/render-utils": "latest",\n' +
+        '    "libavinnerrecord": "latest" '
       )
     ))
 }
