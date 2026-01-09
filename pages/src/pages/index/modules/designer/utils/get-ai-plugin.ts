@@ -136,13 +136,14 @@ ${fileFormat({
   - 强调色：金色 \`#D4AF37\` 或青金石蓝 \`#2A5CAA\`（用于渐变资产卡片）
   - 背景色：浅灰 \`#F8F9FA\`
   - 文字色：标题 \`#111111\`，正文 \`#444444\`，辅助信息 \`#888888\`
-- *字号规范*（基于 16px 基准）：
-  - 页面标题：\`20px\` 粗体
-  - 卡片标题：\`16px\` 中等
-  - 金额数字：\`24px\` 粗体（关键数据放大）
+- *字号规范*（基于 14px 基准）：
+  - 页面标题：\`16px\` 粗体
+  - 卡片标题：\`14px\` 中等
+  - 金额数字：\`20px\` 粗体（关键数据放大）
   - 辅助文字：\`12px\`
 - *间距与圆角*：
-  - 模块垂直间距：\`16px\`
+  - 页面间距：\`10px\`
+  - 模块垂直间距：\`10px\`
   - 卡片圆角：\`12px\`
   - 按钮圆角：\`8px\`
   - 安全区域适配：顶部状态栏下留出安全边距
@@ -231,7 +232,7 @@ ${fileFormat({
 - *设计风格*：极简科技风，强调**功能直达**与**信息层级清晰**
 - *色彩体系*：
   - 主背景：浅蓝白渐变 \`linear-gradient(135deg, #F0F7FF, #FFFFFF)\`
-  - 主色调：深蓝 \`#0066CC\`（用于主按钮）
+  - 主色调：深蓝 \`#0066CC\`
   - 辅助色：天蓝 \`#4DB8FF\`（考试）、绿色 \`#2EC47B\`（投票）
   - 文字色：标题 \`#111111\`，正文 \`#666666\`，辅助信息 \`#999999\`
 - *字号规范*：
@@ -240,9 +241,9 @@ ${fileFormat({
   - 问卷标题：\`18px\`
   - 参与人数：\`12px\`
 - *间距与圆角*：
-  - 模块间距：\`20px\`
-  - 卡片圆角：\`16px\`
-  - 按钮圆角：\`12px\`
+  - 模块间距：\`10px\`
+  - 卡片圆角：\`8px\`
+  - 按钮圆角：\`8px\`
 
 # 设计亮点
 - **三大核心功能并列呈现**：通过三种颜色的卡片按钮区分“创建问卷”、“创建考试”、“发起投票”，视觉上清晰可辨、主次分明。
@@ -316,31 +317,38 @@ function generatePageActionExamplesPrompts() {
 <user_query>搭建一个个人中心页面框架</user_query>
 <assistant_response>
   首先，必须根据页面内容设置一个合适的页面的高度。
-  其次，必须对页面布局设置一个合理的布局。
+  其次，必须对页面布局设置一个合理的布局,搭建页面时一般用从上到下的楼层化搭建方式，我们推荐在页面最外层设置为flex的垂直布局，设置子组件的左右margin以及高度，这样好调整位置。
   然后
   基于用户当前的选择上下文，我们来实现一个个人中心页面框架，由于是框架，所以我仅给出主体部分，思考过程如下：
-  1. 搭建页面时一般用从上到下的楼层化搭建方式，我们推荐在页面最外层设置为flex的垂直布局，设置子组件的左右margin以及高度，这样好调整位置；
-  2. 将页面从上到下分成顶部信息、个人信息、中间入口、底部按钮四个部分；
-  3. 个人信息部分，图文编排卡片，用flex布局实现左右布局；
-  4. 中间入口是竖排的入口，为了方便上下调整，我们可以使用flex布局；
-  5. 底部居下固定的修改个人信息的按钮；
+  1. 将页面从上到下分成顶部信息、个人信息、中间入口、底部按钮四个部分；
+  2. 个人信息部分，图文编排卡片，用flex布局实现左右布局；
+    其中
+    - 头像固定宽度64，右侧用户信息容器配置宽度自适应(width=auto)；
+    - 内部的间距由头像的左外间距+用户信息的右外间距组成；
+  3. 中间入口是竖排的入口，使用高度适应内容，保证不会内容溢出；
+  4. 底部居下固定的修改个人信息的按钮；
 
   ${fileFormat({
     content: `["_root_",":root","setLayout",{"height": 820}]
     ["_root_",":root","doConfig",{"path":"root/标题","value":"个人中心页面框架"}]
     ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column","alignItems":"center"}}]
     ["_root_",":root","doConfig",{"path":"root/样式","style":{"background":"#F5F5F5"}}]
-    ["_root_","_rootSlot_","addChild",{"title":"顶部信息","ns":"some.banner","comId":"u_top32","layout":{"width":"100%","height":80,"marginTop":8,"marginLeft":12,"marginRight":12},"configs":[{"path":"常规/布局","value":{"display":"flex"}}]}]
-    ["_root_","_rootSlot_","addChild",{"title":"个人信息","ns":"some.container","comId":"u_a2fer","layout":{"width":"100%","height":100,"marginLeft":8,"marginRight":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"center"}}]}]
-    ["u_a2fer", "content", "addChild",{"title":"头像","ns":"some.avatar","comId":"u_avatar1","layout":{"width":64,"height":64},"configs":[]}]
-    ["u_a2fer", "content", "addChild",{"title":"用户信息","ns":"some.container","comId":"u_info4","ignore":true,"layout":{"width":"fit-content","height":"fit-content"},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","alignItems":"center"}}]}]
-    ["_root_","_rootSlot_","addChild",{"title":"中间入口","ns":"some.container","comId":"u_iiusd7","layout":{"width":"100%","height":200,"marginLeft":8,"marginRight":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]
+    ["_root_","_rootSlot_","addChild",{"title":"顶部信息","ns":"some.banner","comId":"u_top32","layout":{"width":"100%","height":80,"marginTop":10,"marginLeft":10,"marginRight":10},"configs":[{"path":"常规/布局","value":{"display":"flex"}}]}]
+    ["_root_","_rootSlot_","addChild",{"title":"个人信息","ns":"some.container","comId":"u_a2fer","layout":{"width":"100%","height":"fit-content","marginLeft":5,"marginRight":5},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"center"}}]}]
+    ["u_a2fer", "content", "addChild",{"title":"头像","ns":"some.avatar","comId":"u_avatar1","layout":{"width":64,"height":64,"marginLeft":5,"marginRight":10},"configs":[]}]
+    ["u_a2fer", "content", "addChild",{"title":"用户信息","ns":"some.container","comId":"u_info4","ignore":true,"layout":{"width":"auto","height":"fit-content","marginRight": 5},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","alignItems":"center"}}]}]
+    ["_root_","_rootSlot_","addChild",{"title":"中间入口","ns":"some.container","comId":"u_iiusd7","layout":{"width":"100%","height":"fit-content","marginLeft":5,"marginRight":5},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"column"}}]}]
+    ["u_iiusd7", "content", "addChild",{"title":"隐私协议","ns":"some.container","comId":"u_pricy1","enhance":true,"layout":{"width":100,"height":"fit-content"},"configs":[]}]
     ["_root_","_rootSlot_","addChild",{"title":"底部固定按钮","comId":"u_btm21","ns":"some.container","layout":{"width":"100%","height":84,"position":"fixed","bottom":0,"left":0},"configs":[{"path":"常规/布局","value":{"display":"flex"}}]}]`,
     fileName: '生成个人中心页面操作步骤.json'
   })}
 
   注意：
+  - 个人信息横向擦用固定 + 自适应方式，是常见的横向布局示例，保证内容拓展还能维持原有布局；
+  - 各类组件在flex布局下建议使用height=fit-content来自适应高度，比如个人信息、中间入口等，减少计算错误的可能；
+  - 整体遵循5px网格间距系统，包括模块间距为10=5*2；
   - 用户信息布局组件父组件为布局组件，且仅承担布局功能，不承担样式、点击功能，我们添加ignore标记来优化。
+  - 隐私协议为图文信息入口，大概率有点击事件，所以用enhance标记来优化。
 </assistant_response>
 </example>
 
@@ -357,7 +365,7 @@ function generatePageActionExamplesPrompts() {
     content: `["_root_",":root","setLayout",{"height": 360}]
     ["_root_",":root","doConfig",{"path":"root/标题","value":"一行三列的导航"}]
     ["_root_",":root","doConfig",{"path":"root/布局","value":{"display":"flex","flexDirection":"column","alignItems":"center"}}]
-    ["_root_","_rootSlot_","addChild",{"title":"Flex容器","ns":"some.container","comId":"u_iiusd7","layout":{"width":"100%","height":200,"marginLeft":8,"marginRight":8},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"center","flexWrap":"wrap"}}]}]
+    ["_root_","_rootSlot_","addChild",{"title":"Flex容器","ns":"some.container","comId":"u_iiusd7","enhance":true,"layout":{"width":"100%","height":"fit-content","marginLeft":5,"marginRight":5},"configs":[{"path":"常规/布局","value":{"display":"flex","flexDirection":"row","justifyContent":"space-between","alignItems":"center","flexWrap":"wrap"}}]}]
     ["u_iiusd7","content","addChild",{"title":"导航1","ns":"some.icon","comId":"u_icon1","layout":{"width":120,"height":120,"marginTop":8},"configs":[{"path":"样式/文本","style":{"background":"#0000FF"}}]}]`,
     fileName: '一行三列导航操作步骤.json'
   })}
